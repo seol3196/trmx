@@ -1,0 +1,31 @@
+{
+  "name": "clicknote",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "web",
+    "mobile",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "yarn workspace web dev",
+    "dev:mobile": "yarn workspace mobile start",
+    "build:web": "yarn workspace web build",
+    "build:mobile": "yarn workspace mobile build",
+    "lint": "eslint .",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\""
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^18.4.3",
+    "@commitlint/config-conventional": "^18.4.3",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.2.0",
+    "prettier": "^3.1.1",
+    "turbo": "^1.11.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+} 
