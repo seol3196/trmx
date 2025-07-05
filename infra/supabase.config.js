@@ -8,19 +8,19 @@
 // 실제 사용 시 .env 파일에서 로드하여 사용하세요.
 const config = {
   development: {
-    url: process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://localhost:54321',
-    anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'your-anon-key',
-    serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || 'your-service-role-key',
+    url: process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://kbnskzykzornnvjoknry.supabase.co',
+    anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtibnNrenlrem9ybm52am9rbnJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE3MjM1NzEsImV4cCI6MjA2NzI5OTU3MX0.nhqiud7ulbcwkc76vEQ9sdKEGFqnP4N__rO-eeMfQXs',
+    serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || '', // 실제 프로젝트에서는 보안을 위해 환경변수로 설정하세요
   },
   test: {
-    url: process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://localhost:54321',
-    anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'your-test-anon-key',
-    serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || 'your-test-service-role-key',
+    url: process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://kbnskzykzornnvjoknry.supabase.co',
+    anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtibnNrenlrem9ybm52am9rbnJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE3MjM1NzEsImV4cCI6MjA2NzI5OTU3MX0.nhqiud7ulbcwkc76vEQ9sdKEGFqnP4N__rO-eeMfQXs',
+    serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || '', // 실제 프로젝트에서는 보안을 위해 환경변수로 설정하세요
   },
   production: {
-    url: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    url: process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://kbnskzykzornnvjoknry.supabase.co',
+    anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtibnNrenlrem9ybm52am9rbnJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE3MjM1NzEsImV4cCI6MjA2NzI5OTU3MX0.nhqiud7ulbcwkc76vEQ9sdKEGFqnP4N__rO-eeMfQXs',
+    serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || '', // 실제 프로젝트에서는 보안을 위해 환경변수로 설정하세요
   },
 };
 
@@ -48,7 +48,7 @@ if (require.main === module) {
   // Supabase 클라이언트 생성
   const supabase = createClient(
     config.development.url,
-    config.development.serviceRoleKey
+    config.development.serviceRoleKey || config.development.anonKey
   );
   
   // 마이그레이션 디렉토리 경로
