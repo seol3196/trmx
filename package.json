@@ -13,11 +13,14 @@
     "build:web": "yarn workspace web build",
     "build:mobile": "yarn workspace mobile build",
     "lint": "eslint .",
-    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\""
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
+    "db:migrate": "node infra/supabase.config.js migrate",
+    "db:rollback": "node infra/supabase.config.js rollback"
   },
   "devDependencies": {
     "@commitlint/cli": "^18.4.3",
     "@commitlint/config-conventional": "^18.4.3",
+    "@supabase/supabase-js": "^2.39.3",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "husky": "^8.0.3",
