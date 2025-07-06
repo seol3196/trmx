@@ -9,7 +9,6 @@ interface Card {
   title: string;
   description: string;
   subject: string;
-  category: string;
   color: string;
   icon: string;
 }
@@ -23,13 +22,11 @@ export default function CardManagementPage() {
     title: '',
     description: '',
     subject: '공통',
-    category: '행동',
     color: '#4F46E5',
     icon: '📝'
   });
   
   const [subjects, setSubjects] = useState<string[]>(['공통', '국어', '수학', '영어', '과학', '사회', '음악', '미술', '체육']);
-  const [categories, setCategories] = useState<string[]>(['행동', '학습', '참여', '태도', '협력', '창의성']);
   const [availableIcons] = useState<string[]>(['📝', '🔍', '📚', '✏️', '🖊️', '📒', '🎯', '🏆', '👍', '👏', '🌟', '⭐', '💯', '🎓', '🧠', '💡', '🔆', '📊', '📈', '🧩']);
   const [availableColors] = useState<string[]>(['#4F46E5', '#2563EB', '#0891B2', '#059669', '#65A30D', '#CA8A04', '#DC2626', '#9333EA', '#DB2777', '#475569']);
   const [selectedSubject, setSelectedSubject] = useState<string>('전체');
@@ -54,14 +51,9 @@ export default function CardManagementPage() {
         // 기존 과목 및 카테고리 목록 가져오기
         if (typedCards && typedCards.length > 0) {
           const existingSubjects = Array.from(new Set(typedCards.map(card => card.subject)));
-          const existingCategories = Array.from(new Set(typedCards.map(card => card.category)));
           
           if (existingSubjects.length > 0) {
             setSubjects(prev => Array.from(new Set([...prev, ...existingSubjects])));
-          }
-          
-          if (existingCategories.length > 0) {
-            setCategories(prev => Array.from(new Set([...prev, ...existingCategories])));
           }
         }
       } catch (error) {
@@ -177,7 +169,6 @@ export default function CardManagementPage() {
       title: '',
       description: '',
       subject: '공통',
-      category: '행동',
       color: '#4F46E5',
       icon: '📝'
     });
@@ -193,14 +184,9 @@ export default function CardManagementPage() {
     }
   };
 
-  // 카테고리 추가
-  const handleAddCategory = () => {
-    const newCategory = prompt('추가할 카테고리명을 입력하세요:');
-    if (newCategory && !categories.includes(newCategory)) {
-      setCategories([...categories, newCategory]);
-      setCurrentCard({ ...currentCard, category: newCategory });
-    }
-  };
+  const filteredCards = selectedSubject === '전체'
+    ? cards
+    : cards.filter(card => card.subject === selectedSubject);
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb', padding: '1.5rem 0' }}>
@@ -326,47 +312,6 @@ export default function CardManagementPage() {
                       </button>
                     </div>
                   </div>
-                  
-                  {/* 카테고리 */}
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.25rem' }}>카테고리</label>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <select
-                        style={{ 
-                          flex: '1', 
-                          padding: '0.75rem', 
-                          border: '1px solid #d1d5db', 
-                          borderRadius: '0.5rem', 
-                          outline: 'none',
-                          transition: 'all 0.2s'
-                        }}
-                        value={currentCard.category}
-                        onChange={(e) => setCurrentCard({ ...currentCard, category: e.target.value })}
-                      >
-                        {categories.map(category => (
-                          <option key={category} value={category}>{category}</option>
-                        ))}
-                      </select>
-                      <button
-                        style={{
-                          padding: '12px 16px',
-                          backgroundColor: '#e5e7eb',
-                          color: '#374151',
-                          borderRadius: '8px',
-                          border: 'none',
-                          cursor: 'pointer',
-                          minWidth: '48px',
-                          minHeight: '48px',
-                          transition: 'all 0.2s'
-                        }}
-                        onMouseOver={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#d1d5db'}
-                        onMouseOut={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#e5e7eb'}
-                        onClick={handleAddCategory}
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
                 </div>
                 
                 {/* 아이콘 선택 */}
@@ -483,9 +428,7 @@ export default function CardManagementPage() {
                   overflowY: 'auto', 
                   paddingRight: '0.5rem' 
                 }}>
-                  {cards
-                    .filter(card => selectedSubject === '전체' || card.subject === selectedSubject)
-                    .map(card => (
+                  {filteredCards.map(card => (
                     <div 
                       key={card.id} 
                       style={{ 
@@ -503,7 +446,7 @@ export default function CardManagementPage() {
                           <span style={{ fontSize: '1.875rem' }}>{card.icon}</span>
                           <div>
                             <h3 style={{ fontWeight: '600', fontSize: '1.125rem' }}>{card.title}</h3>
-                            <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>{card.subject} / {card.category}</p>
+                            <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>{card.subject}</p>
                           </div>
                         </div>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>

@@ -42,7 +42,7 @@ export async function GET() {
     const { data, error } = await supabase
       .from('cards')
       .select('*')
-      .order('subject, category');
+      .order('subject');
     
     if (error) {
       console.error('카드 데이터 로드 오류:', error);
@@ -119,7 +119,6 @@ export async function PUT(request: Request) {
         title: cardData.title,
         description: cardData.description,
         subject: cardData.subject,
-        category: cardData.category,
         color: cardData.color,
         icon: cardData.icon,
         user_id: userId

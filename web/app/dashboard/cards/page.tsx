@@ -15,7 +15,6 @@ interface Card {
   title: string;
   description: string;
   subject: string;
-  category: string;
   color: string;
   icon: string;
 }
@@ -429,18 +428,6 @@ export default function CardsPage() {
                         <h3 style={{ fontWeight: '600', fontSize: '0.875rem', color: '#1f2937' }}>{card.title}</h3>
                       </div>
                       <p style={{ fontSize: '0.75rem', color: '#4b5563', marginBottom: '0.5rem', maxHeight: '2.5rem', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{card.description}</p>
-                      <div style={{ marginTop: '0.375rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ 
-                          fontSize: '0.7rem', 
-                          padding: '0.125rem 0.5rem', 
-                          backgroundColor: '#f3f4f6', 
-                          borderRadius: '9999px', 
-                          color: '#4b5563', 
-                          fontWeight: '500' 
-                        }}>
-                          {card.category}
-                        </span>
-                      </div>
                     </div>
                   </div>
                 ))}

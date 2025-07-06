@@ -16,7 +16,6 @@ interface Card {
   title: string;
   description: string;
   subject: string;
-  category: string;
   color: string;
   icon: string;
 }
