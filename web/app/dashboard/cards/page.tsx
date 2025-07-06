@@ -160,115 +160,142 @@ export default function CardsPage() {
   const subjects = Array.from(new Set(cards.map(card => card.subject)));
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6">카드형 기록</h1>
-      
-      {isLoading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-        </div>
-      ) : (
-        <>
-          {/* 학생 선택 */}
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold mb-2">학생 선택</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-              {students.map(student => (
+    <div className="min-h-screen bg-gray-50 py-6">
+      <div className="container mx-auto px-4">
+        <h1 className="text-2xl font-bold mb-6 text-gray-800">카드형 기록</h1>
+        
+        {isLoading ? (
+          <div className="flex flex-col justify-center items-center h-64 bg-white rounded-xl shadow-sm p-6">
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-blue-500"></div>
+            <p className="mt-4 text-gray-600">데이터를 불러오는 중입니다...</p>
+          </div>
+        ) : (
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            {/* 학생 선택 */}
+            <div className="mb-8">
+              <h2 className="text-lg font-semibold mb-3">학생 선택</h2>
+              <table className="w-full border-collapse">
+                <tbody>
+                  {Array.from({ length: Math.ceil(students.length / 6) }).map((_, rowIndex) => (
+                    <tr key={rowIndex}>
+                      {students.slice(rowIndex * 6, rowIndex * 6 + 6).map(student => (
+                        <td key={student.id} className="p-1" style={{ width: '16.666%' }}>
+                          <button
+                            className={`flex flex-col items-center justify-center py-3 px-1 rounded-lg shadow-sm transition-all duration-200 h-24 w-full ${
+                              selectedStudent?.id === student.id
+                                ? 'bg-blue-500 text-white shadow-md transform scale-105'
+                                : 'bg-white border border-gray-200 hover:bg-gray-50 hover:border-blue-300'
+                            }`}
+                            onClick={() => setSelectedStudent(student)}
+                          >
+                            <span className={`text-lg font-medium ${selectedStudent?.id === student.id ? 'text-white' : 'text-gray-700'}`}>
+                              {student.name}
+                            </span>
+                            <span className={`text-sm mt-1 ${selectedStudent?.id === student.id ? 'text-blue-100' : 'text-gray-500'}`}>
+                              {student.student_number}번
+                            </span>
+                          </button>
+                        </td>
+                      ))}
+                      {/* Fill empty cells to maintain 6 columns */}
+                      {Array.from({ length: 6 - (students.slice(rowIndex * 6, rowIndex * 6 + 6).length) }).map((_, i) => (
+                        <td key={`empty-${i}`} className="p-1" style={{ width: '16.666%' }}></td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            
+            {/* 과목 선택 */}
+            <div className="mb-8">
+              <h2 className="text-lg font-semibold mb-3">과목 선택</h2>
+              <div className="flex flex-wrap gap-3">
+                {subjects.map(subject => (
+                  <button
+                    key={subject}
+                    className={`px-6 py-4 rounded-lg font-medium transition-all duration-200 text-lg ${
+                      selectedSubject === subject
+                        ? 'bg-blue-500 text-white shadow-md transform scale-105'
+                        : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-blue-300'
+                    }`}
+                    onClick={() => setSelectedSubject(subject)}
+                  >
+                    {subject}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            {/* 메모 입력 */}
+            <div className="mb-8">
+              <h2 className="text-lg font-semibold mb-3">메모 (선택사항)</h2>
+              <div className="flex flex-col md:flex-row gap-4">
+                <textarea
+                  className="flex-1 p-4 border border-gray-200 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-500 outline-none transition-all text-base"
+                  placeholder="추가 메모를 입력하세요..."
+                  value={memo}
+                  onChange={(e) => setMemo(e.target.value)}
+                  rows={4}
+                ></textarea>
                 <button
-                  key={student.id}
-                  className={`p-2 rounded text-sm ${
-                    selectedStudent?.id === student.id
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-100 hover:bg-gray-200'
-                  }`}
-                  onClick={() => setSelectedStudent(student)}
+                  className="px-6 py-4 bg-green-500 text-white rounded-lg shadow hover:bg-green-600 hover:shadow-md transition-all duration-200 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed text-lg md:self-end"
+                  onClick={handleMemoSave}
+                  disabled={!selectedStudent || !memo}
                 >
-                  {student.student_number}. {student.name}
+                  <span className="flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    메모만 저장
+                  </span>
                 </button>
-              ))}
+              </div>
             </div>
-          </div>
-          
-          {/* 과목 선택 */}
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold mb-2">과목 선택</h2>
-            <div className="flex flex-wrap gap-2">
-              {subjects.map(subject => (
-                <button
-                  key={subject}
-                  className={`px-4 py-2 rounded ${
-                    selectedSubject === subject
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-100 hover:bg-gray-200'
-                  }`}
-                  onClick={() => setSelectedSubject(subject)}
-                >
-                  {subject}
-                </button>
-              ))}
-            </div>
-          </div>
-          
-          {/* 메모 입력 */}
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold mb-2">메모 (선택사항)</h2>
-            <div className="flex gap-2">
-              <textarea
-                className="flex-1 p-2 border rounded"
-                placeholder="추가 메모를 입력하세요..."
-                value={memo}
-                onChange={(e) => setMemo(e.target.value)}
-                rows={2}
-              ></textarea>
-              <button
-                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 whitespace-nowrap"
-                onClick={handleMemoSave}
-                disabled={!selectedStudent || !memo}
-              >
-                메모만 저장
-              </button>
-            </div>
-          </div>
-          
-          {/* 카드 목록 */}
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold mb-2">카드 선택</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filteredCards.map(card => (
-                <div
-                  key={card.id}
-                  className="border rounded-lg overflow-hidden shadow-sm hover:shadow-md cursor-pointer transition-shadow"
-                  style={{ borderLeft: `4px solid ${card.color}` }}
-                  onClick={() => handleCardClick(card)}
-                >
-                  <div className="p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xl">{card.icon}</span>
-                      <h3 className="font-semibold">{card.title}</h3>
-                    </div>
-                    <p className="text-sm text-gray-600">{card.description}</p>
-                    <div className="mt-2 flex justify-between items-center">
-                      <span className="text-xs px-2 py-1 bg-gray-100 rounded">
-                        {card.category}
-                      </span>
+            
+            {/* 카드 목록 */}
+            <div className="mb-8">
+              <h2 className="text-lg font-semibold mb-3">카드 선택</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {filteredCards.map(card => (
+                  <div
+                    key={card.id}
+                    className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md cursor-pointer transition-all duration-200 hover:transform hover:scale-105 bg-white"
+                    style={{ borderLeft: `6px solid ${card.color}` }}
+                    onClick={() => handleCardClick(card)}
+                  >
+                    <div className="p-5">
+                      <div className="flex items-center gap-3 mb-4">
+                        <span className="text-4xl">{card.icon}</span>
+                        <h3 className="font-semibold text-lg text-gray-800">{card.title}</h3>
+                      </div>
+                      <p className="text-base text-gray-600 mb-4">{card.description}</p>
+                      <div className="mt-3 flex justify-between items-center">
+                        <span className="text-sm px-4 py-1.5 bg-gray-100 rounded-full text-gray-700 font-medium">
+                          {card.category}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+            </div>
+            
+            {/* 기록 보기 링크 */}
+            <div className="mt-10 text-center">
+              <Link
+                href="/dashboard/records"
+                className="inline-flex items-center px-8 py-5 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 hover:shadow-md transition-all duration-200 font-medium text-lg"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                기록 목록 보기
+              </Link>
             </div>
           </div>
-          
-          {/* 기록 보기 링크 */}
-          <div className="mt-8 text-center">
-            <Link
-              href="/dashboard/records"
-              className="inline-block px-6 py-3 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-              기록 목록 보기
-            </Link>
-          </div>
-        </>
-      )}
+        )}
+      </div>
     </div>
   );
 } 

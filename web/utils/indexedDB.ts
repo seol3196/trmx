@@ -44,7 +44,9 @@ export const initializeDB = (): Promise<void> => {
     // 간단하게 초기화 성공으로 처리
     console.log('IndexedDB 초기화 간소화됨');
     // 로컬 저장소에 대체 사용 표시
-    localStorage.setItem('use-local-storage-fallback', 'true');
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('use-local-storage-fallback', 'true');
+    }
     resolve();
   });
 };
@@ -55,26 +57,49 @@ let localRecords: {[key: string]: StoredCardRecord} = {};
 let localSyncQueue: {[key: string]: SyncQueueItem} = {};
 
 // 앱 시작 시 로컬 저장소에서 데이터 복원
-try {
-  const savedRecords = localStorage.getItem('clicknote-records');
-  if (savedRecords) {
-    localRecords = JSON.parse(savedRecords);
-    console.log('로컬 저장소에서 기록 복원됨:', Object.keys(localRecords).length);
+if (typeof window !== 'undefined') {
+  try {
+    const savedRecords = localStorage.getItem('clicknote-records');
+    if (savedRecords) {
+      localRecords = JSON.parse(savedRecords);
+      console.log('로컬 저장소에서 기록 복원됨:', Object.keys(localRecords).length);
+    }
+    
+    const savedQueue = localStorage.getItem('clicknote-sync-queue');
+    if (savedQueue) {
+      localSyncQueue = JSON.parse(savedQueue);
+      console.log('로컬 저장소에서 동기화 큐 복원됨:', Object.keys(localSyncQueue).length);
+    }
+  } catch (error) {
+    console.error('로컬 저장소 복원 오류:', error);
   }
-  
-  const savedQueue = localStorage.getItem('clicknote-sync-queue');
-  if (savedQueue) {
-    localSyncQueue = JSON.parse(savedQueue);
-    console.log('로컬 저장소에서 동기화 큐 복원됨:', Object.keys(localSyncQueue).length);
-  }
-} catch (error) {
-  console.error('로컬 저장소 복원 오류:', error);
 }
 
 // 저장소에 변경사항 저장
 const saveToLocalStorage = () => {
-  localStorage.setItem('clicknote-records', JSON.stringify(localRecords));
-  localStorage.setItem('clicknote-sync-queue', JSON.stringify(localSyncQueue));
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('clicknote-records', JSON.stringify(localRecords));
+    localStorage.setItem('clicknote-sync-queue', JSON.stringify(localSyncQueue));
+  }
+};
+
+// localStorage 폴백 구현
+const useLocalStorageFallback = () => {
+  // Check if we're in a browser environment
+  const isBrowser = typeof window !== 'undefined';
+  
+  if (!isBrowser) {
+    return false;
+  }
+  
+  try {
+    localStorage.setItem('test', 'test');
+    localStorage.removeItem('test');
+    return true;
+  } catch (e) {
+    console.error('localStorage is not available:', e);
+    return false;
+  }
 };
 
 // 기록 저장
