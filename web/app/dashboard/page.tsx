@@ -111,28 +111,6 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen">
-      {/* 상단 네비게이션 바 */}
-      <nav className="bg-white shadow-md">
-        <div className="container">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center">
-              <h1 className="text-xl font-bold" style={{ color: 'var(--primary-color)' }}>ClickNote</h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Link href="/dashboard" className="text-primary-color font-medium">
-                대시보드
-              </Link>
-              <Link href="/dashboard/cards" className="text-gray-600 hover:text-primary-color">
-                카드 기록
-              </Link>
-              <Link href="/dashboard/records" className="text-gray-600 hover:text-primary-color">
-                기록 조회
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-
       {/* 메인 컨텐츠 */}
       <main className="container py-8">
         <div className="flex flex-col gap-6 md:flex-row">
