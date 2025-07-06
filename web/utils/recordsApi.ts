@@ -66,58 +66,92 @@ const notifySyncStatusChange = async () => {
   syncStatusSubscribers.forEach(callback => callback(status));
 };
 
-// 기록 저장 - 온라인/오프라인 모두 지원
-export const saveRecord = async (record: CardRecord): Promise<string> => {
-  // 로컬 저장소에 저장
-  const recordId = await indexedDB.saveRecord(record);
-  
-  // 온라인 상태일 때 서버에도 저장
-  if (isOnline()) {
-    try {
-      await saveRecordToServer({...record, id: recordId});
-      await indexedDB.updateRecordSyncStatus(recordId, true);
-    } catch (error) {
-      console.error('서버 저장 오류:', error);
-      // 동기화 큐에 추가
-      await indexedDB.addToSyncQueue({
-        operation: 'create',
-        data: {...record, id: recordId},
-        timestamp: Date.now()
-      });
-    }
-  } else {
-    // 오프라인 상태일 때 동기화 큐에 추가
-    await indexedDB.addToSyncQueue({
-      operation: 'create',
-      data: {...record, id: recordId},
-      timestamp: Date.now()
-    });
-  }
-  
-  // 동기화 상태 업데이트
-  await notifySyncStatusChange();
-  
-  return recordId;
-};
-
 // 서버에 기록 저장
 export const saveRecordToServer = async (record: CardRecord): Promise<void> => {
-  const supabase = createBrowserClient();
-  
-  // 서버에 저장
-  const { error } = await supabase
-    .from('notes')
-    .insert({
-      id: record.id,
-      student_id: record.studentId,
-      card_id: record.cardId || null,
-      content: record.memo,
-      recorded_date: new Date(record.recordedDate).toISOString().split('T')[0],
-      created_by: (await supabase.auth.getUser()).data.user?.id || ''
-    });
-  
-  if (error) {
-    console.error('Supabase 저장 오류:', error);
+  try {
+    console.log('서버에 기록 저장 시도:', record.id);
+    const supabase = createBrowserClient();
+    
+    // 서버에 저장
+    const { data, error } = await supabase
+      .from('notes')
+      .insert({
+        id: record.id,
+        student_id: record.studentId,
+        card_id: record.cardId || null,
+        content: record.memo,
+        recorded_date: new Date(record.recordedDate).toISOString().split('T')[0],
+        created_by: (await supabase.auth.getUser()).data.user?.id || ''
+      });
+    
+    if (error) {
+      console.error('Supabase 저장 오류:', error);
+      throw error;
+    }
+    
+    console.log('서버 저장 성공:', record.id);
+  } catch (error) {
+    console.error('서버 저장 중 예외 발생:', error);
+    throw error;
+  }
+};
+
+// 기록 저장 - 온라인/오프라인 모두 지원
+export const saveRecord = async (record: CardRecord): Promise<string> => {
+  try {
+    console.log('기록 저장 함수 호출됨:', record);
+    
+    if (!record.id) {
+      record.id = crypto.randomUUID();
+      console.log('새 ID 생성:', record.id);
+    }
+    
+    // 로컬에 저장
+    console.log('로컬 스토리지에 저장 시도...');
+    const recordId = await indexedDB.saveRecord(record);
+    console.log('로컬 저장 성공:', recordId);
+    
+    // 온라인 상태일 때 서버에도 저장 시도
+    try {
+      if (isOnline()) {
+        console.log('온라인 상태 - 서버 저장 시도');
+        try {
+          await saveRecordToServer(record);
+          console.log('서버 저장 성공');
+          
+          // 동기화 상태 업데이트
+          await indexedDB.updateRecordSyncStatus(record.id, true);
+          console.log('동기화 상태 업데이트 완료');
+        } catch (serverError) {
+          console.error('서버 저장 실패, 동기화 큐에 추가:', serverError);
+          
+          // 서버 저장 실패 시 동기화 큐에 추가
+          await indexedDB.addToSyncQueue({
+            operation: 'create',
+            data: record,
+            timestamp: Date.now()
+          });
+          console.log('동기화 큐에 추가됨');
+        }
+      } else {
+        console.log('오프라인 상태 - 동기화 큐에 추가');
+        
+        // 오프라인일 때 동기화 큐에 추가
+        await indexedDB.addToSyncQueue({
+          operation: 'create',
+          data: record,
+          timestamp: Date.now()
+        });
+        console.log('동기화 큐에 추가됨');
+      }
+    } catch (syncError) {
+      console.error('동기화 처리 오류:', syncError);
+      // 동기화 처리 실패해도 로컬 저장은 성공했으므로 계속 진행
+    }
+    
+    return recordId;
+  } catch (error) {
+    console.error('기록 저장 전체 오류:', error);
     throw error;
   }
 };
@@ -140,52 +174,71 @@ export const deleteRecordFromServer = async (recordId: string): Promise<void> =>
 
 // 기록 가져오기 - 온라인/오프라인 모두 지원
 export const getRecords = async (): Promise<CardRecord[]> => {
-  // 로컬 저장소에서 가져오기
-  const localRecords = await indexedDB.getRecords();
+  console.log('getRecords 함수 호출됨');
   
-  // 온라인 상태일 때 서버에서도 가져오기
-  if (isOnline()) {
-    try {
-      const supabase = createBrowserClient();
-      
-      // 서버에서 기록 가져오기
-      const { data: serverRecords, error } = await supabase
-        .from('notes')
-        .select('*')
-        .order('recorded_date', { ascending: false });
-      
-      if (error) {
-        console.error('Supabase 조회 오류:', error);
+  // 로컬 저장소에서 가져오기
+  try {
+    const localRecords = await indexedDB.getRecords();
+    console.log('로컬 저장소에서 가져온 기록:', localRecords.length, '개');
+    
+    // 온라인 상태일 때 서버에서도 가져오기
+    if (isOnline()) {
+      console.log('온라인 상태 - 서버에서 기록 가져오는 중');
+      try {
+        const supabase = createBrowserClient();
+        console.log('Supabase 클라이언트 생성됨');
+        
+        // 서버에서 기록 가져오기
+        const { data: serverRecords, error } = await supabase
+          .from('notes')
+          .select('*')
+          .order('recorded_date', { ascending: false });
+        
+        if (error) {
+          console.error('Supabase 조회 오류:', error);
+          return localRecords;
+        }
+        
+        console.log('서버에서 가져온 기록:', serverRecords?.length || 0, '개');
+        
+        // 서버 데이터를 로컬 형식으로 변환
+        const formattedServerRecords: CardRecord[] = (serverRecords || []).map(record => {
+          console.log('서버 기록 변환:', record);
+          return {
+            id: record.id as string,
+            studentId: record.student_id as string,
+            cardId: record.card_id ? String(record.card_id) : undefined,
+            subject: record.subject as string | undefined,
+            memo: record.content as string, // 서버의 content 필드가 memo로 매핑됨
+            recordedDate: new Date(record.recorded_date as string | number),
+            serverSynced: true
+          };
+        });
+        
+        // 로컬 데이터와 병합 (서버 데이터 우선)
+        const mergedRecords = mergeRecords(localRecords, formattedServerRecords);
+        console.log('병합된 총 기록:', mergedRecords.length, '개');
+        
+        // 로컬 저장소 업데이트
+        console.log('로컬 저장소 업데이트 중');
+        for (const record of mergedRecords) {
+          await indexedDB.saveRecord(record, true); // skipQueue=true로 설정하여 동기화 큐에 추가하지 않음
+        }
+        
+        return mergedRecords;
+      } catch (error) {
+        console.error('서버 데이터 가져오기 오류:', error);
         return localRecords;
       }
-      
-      // 서버 데이터를 로컬 형식으로 변환
-      const formattedServerRecords: CardRecord[] = (serverRecords || []).map(record => ({
-        id: record.id as string,
-        studentId: record.student_id as string,
-        cardId: record.card_id ? String(record.card_id) : undefined,
-        subject: record.subject as string | undefined,
-        memo: record.memo as string,
-        recordedDate: new Date(record.recorded_date as string | number),
-        serverSynced: true
-      }));
-      
-      // 로컬 데이터와 병합 (서버 데이터 우선)
-      const mergedRecords = mergeRecords(localRecords, formattedServerRecords);
-      
-      // 로컬 저장소 업데이트
-      for (const record of mergedRecords) {
-        await indexedDB.saveRecord(record);
-      }
-      
-      return mergedRecords;
-    } catch (error) {
-      console.error('서버 데이터 가져오기 오류:', error);
-      return localRecords;
+    } else {
+      console.log('오프라인 상태 - 로컬 기록만 사용');
     }
+    
+    return localRecords;
+  } catch (error) {
+    console.error('getRecords 실행 오류:', error);
+    return [];
   }
-  
-  return localRecords;
 };
 
 // 로컬 및 서버 기록 병합

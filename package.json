@@ -8,10 +8,11 @@
     "packages/*"
   ],
   "scripts": {
-    "dev:web": "yarn workspace web dev",
-    "dev:mobile": "yarn workspace mobile start",
-    "build:web": "yarn workspace web build",
-    "build:mobile": "yarn workspace mobile build",
+    "dev": "cd web && npm run dev",
+    "dev:web": "cd web && npm run dev",
+    "dev:mobile": "cd mobile && npm run start",
+    "build:web": "cd web && npm run build",
+    "build:mobile": "cd mobile && npm run build",
     "lint": "eslint .",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
     "db:migrate": "node infra/supabase.config.js migrate",
@@ -30,5 +31,8 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "node-fetch": "^2.7.0"
   }
-} 
+}

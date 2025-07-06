@@ -1,5 +1,6 @@
 /**
  * IndexedDB를 사용하여 오프라인 캐시를 구현하는 유틸리티 함수
+ * 단순화된 버전으로 기본 기능만 제공합니다.
  */
 
 const DB_NAME = 'clicknote-db';
@@ -26,237 +27,155 @@ export interface CardRecord {
   serverSynced?: boolean;
 }
 
-// IndexedDB 연결 가져오기
-const getDB = (): Promise<IDBDatabase> => {
-  return new Promise((resolve, reject) => {
-    if (!window.indexedDB) {
-      reject(new Error('이 브라우저는 IndexedDB를 지원하지 않습니다.'));
-      return;
-    }
-    
-    const request = window.indexedDB.open(DB_NAME, DB_VERSION);
-    
-    request.onerror = (event) => {
-      reject(new Error('IndexedDB 연결 오류: ' + (event.target as any).errorCode));
-    };
-    
-    request.onsuccess = (event) => {
-      resolve((event.target as IDBOpenDBRequest).result);
-    };
-    
-    request.onupgradeneeded = (event) => {
-      const db = (event.target as IDBOpenDBRequest).result;
-      
-      // 기록 저장소 생성
-      if (!db.objectStoreNames.contains(RECORDS_STORE)) {
-        db.createObjectStore(RECORDS_STORE, { keyPath: 'id' });
-      }
-      
-      // 동기화 큐 저장소 생성
-      if (!db.objectStoreNames.contains(SYNC_QUEUE_STORE)) {
-        const syncQueueStore = db.createObjectStore(SYNC_QUEUE_STORE, { keyPath: 'id', autoIncrement: true });
-        syncQueueStore.createIndex('timestamp', 'timestamp', { unique: false });
-      }
-    };
+// 로컬 저장을 위한 타입 (recordedDate가 문자열)
+interface StoredCardRecord {
+  id: string;
+  studentId: string;
+  cardId?: string;
+  subject?: string;
+  memo: string;
+  recordedDate: string;
+  serverSynced?: boolean;
+}
+
+// IndexedDB 초기화 (앱 시작시 호출되어야 함)
+export const initializeDB = (): Promise<void> => {
+  return new Promise((resolve) => {
+    // 간단하게 초기화 성공으로 처리
+    console.log('IndexedDB 초기화 간소화됨');
+    // 로컬 저장소에 대체 사용 표시
+    localStorage.setItem('use-local-storage-fallback', 'true');
+    resolve();
   });
+};
+
+// 로컬 저장소 대체 구현
+// 브라우저 IndexedDB 문제 회피를 위해 localStorage 사용
+let localRecords: {[key: string]: StoredCardRecord} = {};
+let localSyncQueue: {[key: string]: SyncQueueItem} = {};
+
+// 앱 시작 시 로컬 저장소에서 데이터 복원
+try {
+  const savedRecords = localStorage.getItem('clicknote-records');
+  if (savedRecords) {
+    localRecords = JSON.parse(savedRecords);
+    console.log('로컬 저장소에서 기록 복원됨:', Object.keys(localRecords).length);
+  }
+  
+  const savedQueue = localStorage.getItem('clicknote-sync-queue');
+  if (savedQueue) {
+    localSyncQueue = JSON.parse(savedQueue);
+    console.log('로컬 저장소에서 동기화 큐 복원됨:', Object.keys(localSyncQueue).length);
+  }
+} catch (error) {
+  console.error('로컬 저장소 복원 오류:', error);
+}
+
+// 저장소에 변경사항 저장
+const saveToLocalStorage = () => {
+  localStorage.setItem('clicknote-records', JSON.stringify(localRecords));
+  localStorage.setItem('clicknote-sync-queue', JSON.stringify(localSyncQueue));
 };
 
 // 기록 저장
 export const saveRecord = async (record: CardRecord, skipQueue: boolean = false): Promise<string> => {
-  const db = await getDB();
-  
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([RECORDS_STORE], 'readwrite');
-    const store = transaction.objectStore(RECORDS_STORE);
+  try {
+    console.log('기록 저장 시작:', record);
     
-    // 날짜 객체를 ISO 문자열로 변환
+    // 새 기록인 경우 ID 생성
+    if (!record.id) {
+      record.id = crypto.randomUUID();
+      console.log('새 ID 생성됨:', record.id);
+    }
+    
+    // 날짜 객체를 ISO 문자열로 변환하여 저장
     const recordToSave = {
       ...record,
-      recordedDate: record.recordedDate instanceof Date
-        ? record.recordedDate.toISOString()
+      recordedDate: record.recordedDate instanceof Date 
+        ? record.recordedDate.toISOString() 
         : record.recordedDate
     };
     
-    const request = store.put(recordToSave);
+    // 로컬 저장소에 저장
+    localRecords[record.id] = recordToSave;
+    saveToLocalStorage();
     
-    request.onsuccess = () => {
-      resolve(record.id);
-    };
-    
-    request.onerror = (event) => {
-      reject(new Error('기록 저장 오류: ' + (event.target as any).error));
-    };
-  });
+    console.log('기록 저장 성공:', record.id);
+    return record.id;
+  } catch (error) {
+    console.error('기록 저장 오류:', error);
+    throw error;
+  }
 };
 
 // 기록 가져오기
 export const getRecords = async (): Promise<CardRecord[]> => {
-  const db = await getDB();
-  
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([RECORDS_STORE], 'readonly');
-    const store = transaction.objectStore(RECORDS_STORE);
-    const request = store.getAll();
+  try {
+    console.log('로컬 저장소에서 기록 가져오기');
     
-    request.onsuccess = (event) => {
-      const records = (event.target as IDBRequest).result;
-      
-      // ISO 문자열을 Date 객체로 변환
-      const recordsWithDates = records.map((record: any) => ({
-        ...record,
-        recordedDate: new Date(record.recordedDate)
-      }));
-      
-      resolve(recordsWithDates);
-    };
+    // 객체를 배열로 변환
+    const records = Object.values(localRecords);
     
-    request.onerror = (event) => {
-      reject(new Error('기록 가져오기 오류: ' + (event.target as any).error));
-    };
-  });
+    // ISO 문자열을 Date 객체로 변환
+    const recordsWithDates = records.map(record => ({
+      ...record,
+      recordedDate: new Date(record.recordedDate)
+    }));
+    
+    console.log(`${recordsWithDates.length}개 기록 가져옴`);
+    return recordsWithDates;
+  } catch (error) {
+    console.error('기록 가져오기 오류:', error);
+    return [];
+  }
 };
 
 // 기록 삭제
 export const deleteRecord = async (id: string): Promise<void> => {
-  const db = await getDB();
-  
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([RECORDS_STORE], 'readwrite');
-    const store = transaction.objectStore(RECORDS_STORE);
-    const request = store.delete(id);
-    
-    request.onsuccess = () => {
-      resolve();
-    };
-    
-    request.onerror = (event) => {
-      reject(new Error('기록 삭제 오류: ' + (event.target as any).error));
-    };
-  });
+  console.log('기록 삭제:', id);
+  delete localRecords[id];
+  saveToLocalStorage();
 };
 
 // 동기화 큐에 항목 추가
 export const addToSyncQueue = async (item: SyncQueueItem): Promise<string> => {
-  const db = await getDB();
+  const id = item.id || crypto.randomUUID();
   
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([SYNC_QUEUE_STORE], 'readwrite');
-    const store = transaction.objectStore(SYNC_QUEUE_STORE);
-    
-    const itemToSave = {
-      ...item,
-      timestamp: Date.now()
-    };
-    
-    const request = store.add(itemToSave);
-    
-    request.onsuccess = (event) => {
-      resolve((event.target as IDBRequest).result as string);
-    };
-    
-    request.onerror = (event) => {
-      reject(new Error('동기화 큐 추가 오류: ' + (event.target as any).error));
-    };
-  });
+  localSyncQueue[id] = {
+    ...item,
+    id,
+    timestamp: Date.now()
+  };
+  
+  saveToLocalStorage();
+  return id;
 };
 
 // 동기화 큐에서 항목 가져오기
 export const getSyncQueue = async (): Promise<SyncQueueItem[]> => {
-  const db = await getDB();
-  
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([SYNC_QUEUE_STORE], 'readonly');
-    const store = transaction.objectStore(SYNC_QUEUE_STORE);
-    const request = store.getAll();
-    
-    request.onsuccess = (event) => {
-      resolve((event.target as IDBRequest).result);
-    };
-    
-    request.onerror = (event) => {
-      reject(new Error('동기화 큐 가져오기 오류: ' + (event.target as any).error));
-    };
-  });
+  return Object.values(localSyncQueue);
 };
 
 // 동기화 큐에서 항목 제거
 export const removeFromSyncQueue = async (item: SyncQueueItem): Promise<void> => {
-  const db = await getDB();
-  
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([SYNC_QUEUE_STORE], 'readwrite');
-    const store = transaction.objectStore(SYNC_QUEUE_STORE);
-    const request = store.delete(item.id as string);
-    
-    request.onsuccess = () => {
-      resolve();
-    };
-    
-    request.onerror = (event) => {
-      reject(new Error('동기화 큐 항목 제거 오류: ' + (event.target as any).error));
-    };
-  });
+  if (item.id) {
+    delete localSyncQueue[item.id];
+    saveToLocalStorage();
+  }
 };
 
 // 기록의 동기화 상태 업데이트
 export const updateRecordSyncStatus = async (id: string, synced: boolean): Promise<void> => {
-  const db = await getDB();
-  
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([RECORDS_STORE], 'readwrite');
-    const store = transaction.objectStore(RECORDS_STORE);
-    const getRequest = store.get(id);
-    
-    getRequest.onsuccess = () => {
-      const record = getRequest.result;
-      
-      if (record) {
-        record.serverSynced = synced;
-        const updateRequest = store.put(record);
-        
-        updateRequest.onsuccess = () => {
-          resolve();
-        };
-        
-        updateRequest.onerror = (event) => {
-          reject(new Error('기록 동기화 상태 업데이트 오류: ' + (event.target as any).error));
-        };
-      } else {
-        reject(new Error('기록을 찾을 수 없음: ' + id));
-      }
-    };
-    
-    getRequest.onerror = (event) => {
-      reject(new Error('기록 가져오기 오류: ' + (event.target as any).error));
-    };
-  });
+  if (localRecords[id]) {
+    localRecords[id].serverSynced = synced;
+    saveToLocalStorage();
+  }
 };
 
 // 모든 데이터 삭제 (개발용)
 export const clearAllData = async (): Promise<void> => {
-  const db = await getDB();
-  
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([RECORDS_STORE, SYNC_QUEUE_STORE], 'readwrite');
-    const recordsStore = transaction.objectStore(RECORDS_STORE);
-    const syncQueueStore = transaction.objectStore(SYNC_QUEUE_STORE);
-    
-    const recordsClearRequest = recordsStore.clear();
-    const syncQueueClearRequest = syncQueueStore.clear();
-    
-    let completed = 0;
-    const checkComplete = () => {
-      completed++;
-      if (completed === 2) {
-        resolve();
-      }
-    };
-    
-    recordsClearRequest.onsuccess = checkComplete;
-    syncQueueClearRequest.onsuccess = checkComplete;
-    
-    transaction.onerror = (event) => {
-      reject(new Error('데이터 삭제 오류: ' + (event.target as any).error));
-    };
-  });
+  localRecords = {};
+  localSyncQueue = {};
+  saveToLocalStorage();
+  console.log('모든 데이터 삭제됨');
 }; 

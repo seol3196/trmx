@@ -1,0 +1,30 @@
+{
+  "mcpServers": {
+    "supabase": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@supabase/mcp-server-supabase@latest",
+        "--read-only",
+        "--project-ref=pkbnskzykzornnvjoknry"
+      ],
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "sbp_f64ec34cd1b9a18c903fac20ef5cbfd463b36228"
+      }
+    },
+    "vooster-ai": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "--package=@vooster/mcp@latest",
+        "vooster-ai",
+        "--api-key=ak_bb2fju8qbtufgy075wraua6v"
+      ],
+      "env": {}
+    }
+  }
+}
