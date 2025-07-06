@@ -74,14 +74,15 @@ export const saveRecordToServer = async (record: CardRecord): Promise<void> => {
     
     // 서버에 저장
     const { data, error } = await supabase
-      .from('notes')
+      .from('card_records')
       .insert({
         id: record.id,
         student_id: record.studentId,
         card_id: record.cardId || null,
-        content: record.memo,
-        recorded_date: new Date(record.recordedDate).toISOString().split('T')[0],
-        created_by: (await supabase.auth.getUser()).data.user?.id || ''
+        subject: record.subject || '',
+        memo: record.memo,
+        recorded_date: new Date(record.recordedDate).toISOString(),
+        user_id: (await supabase.auth.getUser()).data.user?.id || '00000000-0000-0000-0000-000000000000'
       });
     
     if (error) {
@@ -162,7 +163,7 @@ export const deleteRecordFromServer = async (recordId: string): Promise<void> =>
   
   // 서버에서 삭제
   const { error } = await supabase
-    .from('notes')
+    .from('card_records')
     .delete()
     .eq('id', recordId);
   
@@ -190,7 +191,7 @@ export const getRecords = async (): Promise<CardRecord[]> => {
         
         // 서버에서 기록 가져오기
         const { data: serverRecords, error } = await supabase
-          .from('notes')
+          .from('card_records')
           .select('*')
           .order('recorded_date', { ascending: false });
         
@@ -208,8 +209,8 @@ export const getRecords = async (): Promise<CardRecord[]> => {
             id: record.id as string,
             studentId: record.student_id as string,
             cardId: record.card_id ? String(record.card_id) : undefined,
-            subject: record.subject as string | undefined,
-            memo: record.content as string, // 서버의 content 필드가 memo로 매핑됨
+            subject: record.subject as string,
+            memo: record.memo as string,
             recordedDate: new Date(record.recorded_date as string | number),
             serverSynced: true
           };

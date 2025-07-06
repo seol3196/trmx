@@ -3,8 +3,6 @@
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import Link from 'next/link';
-import { createBrowserClient } from '../../../lib/supabase';
-import { getRecords, deleteRecord } from '../../../utils/recordsApi';
 
 // 타입 정의
 interface Student {
@@ -54,31 +52,26 @@ export default function RecordsPage() {
     const loadData = async () => {
       setIsLoading(true);
       try {
-        const supabase = createBrowserClient();
-        
-        // 학생 데이터 가져오기
-        const { data: studentsData, error: studentsError } = await supabase
-          .from('students')
-          .select('id, name, student_number')
-          .order('student_number');
-        
-        if (studentsError) {
-          console.error('학생 데이터 로드 오류:', studentsError);
-          return;
+        // 학생 데이터 가져오기 - API 사용
+        const studentsResponse = await fetch('/api/students');
+        if (!studentsResponse.ok) {
+          throw new Error('학생 데이터를 불러오는데 실패했습니다.');
         }
+        const studentsData = await studentsResponse.json();
         
-        // 카드 데이터 가져오기
-        const { data: cardsData, error: cardsError } = await supabase
-          .from('cards')
-          .select('id, title, description, subject, category, color, icon');
-        
-        if (cardsError) {
-          console.error('카드 데이터 로드 오류:', cardsError);
-          return;
+        // 카드 데이터 가져오기 - API 사용
+        const cardsResponse = await fetch('/api/cards');
+        if (!cardsResponse.ok) {
+          throw new Error('카드 데이터를 불러오는데 실패했습니다.');
         }
+        const cardsData = await cardsResponse.json();
         
-        // 기록 데이터 가져오기
-        const recordsData = await getRecords();
+        // 기록 데이터 가져오기 - API 사용
+        const recordsResponse = await fetch('/api/records');
+        if (!recordsResponse.ok) {
+          throw new Error('기록 데이터를 불러오는데 실패했습니다.');
+        }
+        const recordsData = await recordsResponse.json();
         
         // 기록 데이터에 학생 및 카드 정보 추가
         const enrichedRecords = recordsData.map((record: any) => {
@@ -113,13 +106,25 @@ export default function RecordsPage() {
     if (!confirm('정말로 이 기록을 삭제하시겠습니까?')) return;
     
     try {
-      await deleteRecord(recordId);
+      // API를 통한 기록 삭제
+      const response = await fetch(`/api/records?id=${recordId}`, {
+        method: 'DELETE',
+      });
       
-      // 기록 목록 새로고침
-      const updatedRecords = await getRecords();
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '기록 삭제 중 오류가 발생했습니다.');
+      }
+      
+      // 기록 데이터 다시 로드
+      const recordsResponse = await fetch('/api/records');
+      if (!recordsResponse.ok) {
+        throw new Error('기록 데이터를 불러오는데 실패했습니다.');
+      }
+      const recordsData = await recordsResponse.json();
       
       // 기록 데이터에 학생 및 카드 정보 추가
-      const enrichedRecords = updatedRecords.map((record: any) => {
+      const enrichedRecords = recordsData.map((record: any) => {
         const student = students.find(s => s.id === record.studentId);
         const card = record.cardId 
           ? cards.find(c => c.id === record.cardId) 
@@ -196,7 +201,15 @@ export default function RecordsPage() {
               <div>
                 <label className="block text-base font-medium mb-2">학생</label>
                 <select
-                  className="w-full p-3 border rounded text-base"
+                  style={{ 
+                    width: '100%', 
+                    padding: '0.75rem', 
+                    border: '1px solid #d1d5db', 
+                    borderRadius: '0.5rem', 
+                    outline: 'none',
+                    height: '3.5rem',
+                    fontSize: '1rem'
+                  }}
                   value={selectedStudent}
                   onChange={(e) => setSelectedStudent(e.target.value)}
                 >
@@ -213,7 +226,15 @@ export default function RecordsPage() {
               <div>
                 <label className="block text-base font-medium mb-2">과목</label>
                 <select
-                  className="w-full p-3 border rounded text-base"
+                  style={{ 
+                    width: '100%', 
+                    padding: '0.75rem', 
+                    border: '1px solid #d1d5db', 
+                    borderRadius: '0.5rem', 
+                    outline: 'none',
+                    height: '3.5rem',
+                    fontSize: '1rem'
+                  }}
                   value={selectedSubject}
                   onChange={(e) => setSelectedSubject(e.target.value)}
                 >
@@ -231,7 +252,15 @@ export default function RecordsPage() {
                 <label className="block text-base font-medium mb-2">날짜</label>
                 <input
                   type="date"
-                  className="w-full p-3 border rounded text-base"
+                  style={{ 
+                    width: '100%', 
+                    padding: '0.75rem', 
+                    border: '1px solid #d1d5db', 
+                    borderRadius: '0.5rem', 
+                    outline: 'none',
+                    height: '3.5rem',
+                    fontSize: '1rem'
+                  }}
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
                 />
@@ -242,7 +271,15 @@ export default function RecordsPage() {
                 <label className="block text-base font-medium mb-2">검색</label>
                 <input
                   type="text"
-                  className="w-full p-3 border rounded text-base"
+                  style={{ 
+                    width: '100%', 
+                    padding: '0.75rem', 
+                    border: '1px solid #d1d5db', 
+                    borderRadius: '0.5rem', 
+                    outline: 'none',
+                    height: '3.5rem',
+                    fontSize: '1rem'
+                  }}
                   placeholder="검색어 입력..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}

@@ -32,6 +32,7 @@ export default function CardManagementPage() {
   const [categories, setCategories] = useState<string[]>(['행동', '학습', '참여', '태도', '협력', '창의성']);
   const [availableIcons] = useState<string[]>(['📝', '🔍', '📚', '✏️', '🖊️', '📒', '🎯', '🏆', '👍', '👏', '🌟', '⭐', '💯', '🎓', '🧠', '💡', '🔆', '📊', '📈', '🧩']);
   const [availableColors] = useState<string[]>(['#4F46E5', '#2563EB', '#0891B2', '#059669', '#65A30D', '#CA8A04', '#DC2626', '#9333EA', '#DB2777', '#475569']);
+  const [selectedSubject, setSelectedSubject] = useState<string>('전체');
   
   // 데이터 로드
   useEffect(() => {
@@ -202,28 +203,36 @@ export default function CardManagementPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-6">
-      <div className="container mx-auto px-4">
-        <h1 className="text-2xl font-bold mb-6 text-gray-800">카드 관리</h1>
+    <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb', padding: '1.5rem 0' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1rem' }}>
+        <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1.5rem', color: '#1f2937' }}>카드 관리</h1>
         
         {isLoading ? (
-          <div className="flex flex-col justify-center items-center h-64 bg-white rounded-xl shadow-sm p-6">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-blue-500"></div>
-            <p className="mt-4 text-gray-600">데이터를 불러오는 중입니다...</p>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '16rem', backgroundColor: 'white', borderRadius: '0.75rem', boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)', padding: '1.5rem' }}>
+            <div style={{ height: '4rem', width: '4rem', borderRadius: '50%', border: '4px solid #e5e7eb', borderTopColor: '#3b82f6', animation: 'spin 1s linear infinite' }}></div>
+            <p style={{ marginTop: '1rem', color: '#4b5563' }}>데이터를 불러오는 중입니다...</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' }}>
             {/* 카드 생성/편집 폼 */}
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <h2 className="text-xl font-semibold mb-4">{isEditing ? '카드 편집' : '새 카드 생성'}</h2>
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div style={{ backgroundColor: 'white', borderRadius: '0.75rem', boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)', padding: '1.5rem' }}>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1rem' }}>{isEditing ? '카드 편집' : '새 카드 생성'}</h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
                   {/* 제목 */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">제목</label>
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.25rem' }}>제목</label>
                     <input
                       type="text"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 outline-none transition-all"
+                      style={{ 
+                        width: '100%', 
+                        padding: '0.75rem', 
+                        border: '1px solid #d1d5db', 
+                        borderRadius: '0.5rem', 
+                        outline: 'none',
+                        transition: 'all 0.2s',
+                        boxSizing: 'border-box'
+                      }}
                       placeholder="카드 제목"
                       value={currentCard.title}
                       onChange={(e) => setCurrentCard({ ...currentCard, title: e.target.value })}
@@ -232,16 +241,22 @@ export default function CardManagementPage() {
                   
                   {/* 색상 선택 */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">색상</label>
-                    <div className="grid grid-cols-5 gap-2">
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.25rem' }}>색상</label>
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                       {availableColors.map(color => (
                         <button
                           key={color}
-                          className={`w-10 h-10 rounded-full ${currentCard.color === color ? 'ring-2 ring-offset-2 ring-gray-500' : ''}`}
                           style={{ 
+                            width: '2.5rem', 
+                            height: '2.5rem', 
+                            borderRadius: '50%', 
                             backgroundColor: color, 
                             border: '2px solid #d1d5db',
-                            boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                            outline: currentCard.color === color ? '2px solid #6b7280' : 'none',
+                            outlineOffset: currentCard.color === color ? '2px' : '0',
+                            cursor: 'pointer',
+                            margin: '0.25rem'
                           }}
                           onClick={() => setCurrentCard({ ...currentCard, color })}
                         ></button>
@@ -252,9 +267,17 @@ export default function CardManagementPage() {
                 
                 {/* 설명 */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">설명</label>
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.25rem' }}>설명</label>
                   <textarea
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 outline-none transition-all"
+                    style={{ 
+                      width: '100%', 
+                      padding: '0.75rem', 
+                      border: '1px solid #d1d5db', 
+                      borderRadius: '0.5rem', 
+                      outline: 'none',
+                      transition: 'all 0.2s',
+                      boxSizing: 'border-box'
+                    }}
                     placeholder="카드 설명"
                     rows={3}
                     value={currentCard.description}
@@ -262,13 +285,20 @@ export default function CardManagementPage() {
                   ></textarea>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
                   {/* 과목 */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">과목</label>
-                    <div className="flex gap-2">
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.25rem' }}>과목</label>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
                       <select
-                        className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 outline-none transition-all"
+                        style={{ 
+                          flex: '1', 
+                          padding: '0.75rem', 
+                          border: '1px solid #d1d5db', 
+                          borderRadius: '0.5rem', 
+                          outline: 'none',
+                          transition: 'all 0.2s'
+                        }}
                         value={currentCard.subject}
                         onChange={(e) => setCurrentCard({ ...currentCard, subject: e.target.value })}
                       >
@@ -299,10 +329,17 @@ export default function CardManagementPage() {
                   
                   {/* 카테고리 */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">카테고리</label>
-                    <div className="flex gap-2">
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.25rem' }}>카테고리</label>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
                       <select
-                        className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 outline-none transition-all"
+                        style={{ 
+                          flex: '1', 
+                          padding: '0.75rem', 
+                          border: '1px solid #d1d5db', 
+                          borderRadius: '0.5rem', 
+                          outline: 'none',
+                          transition: 'all 0.2s'
+                        }}
                         value={currentCard.category}
                         onChange={(e) => setCurrentCard({ ...currentCard, category: e.target.value })}
                       >
@@ -334,12 +371,19 @@ export default function CardManagementPage() {
                 
                 {/* 아이콘 선택 */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">아이콘</label>
-                  <div className="grid grid-cols-10 gap-2">
+                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.25rem' }}>아이콘</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(10, 1fr)', gap: '0.5rem' }}>
                     {availableIcons.map(icon => (
                       <button
                         key={icon}
-                        className={`p-2 text-2xl rounded-lg ${currentCard.icon === icon ? 'bg-blue-100 border-2 border-blue-500' : 'bg-gray-50 border border-gray-200'}`}
+                        style={{ 
+                          padding: '0.5rem', 
+                          fontSize: '1.5rem', 
+                          borderRadius: '0.5rem', 
+                          backgroundColor: currentCard.icon === icon ? '#dbeafe' : '#f9fafb',
+                          border: currentCard.icon === icon ? '2px solid #3b82f6' : '1px solid #e5e7eb',
+                          cursor: 'pointer'
+                        }}
                         onClick={() => setCurrentCard({ ...currentCard, icon })}
                       >
                         {icon}
@@ -349,15 +393,31 @@ export default function CardManagementPage() {
                 </div>
                 
                 {/* 버튼 그룹 */}
-                <div className="flex justify-end space-x-3 pt-4">
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', paddingTop: '1rem' }}>
                   <button
-                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all"
+                    style={{ 
+                      padding: '0.5rem 1rem', 
+                      backgroundColor: '#e5e7eb', 
+                      color: '#374151', 
+                      borderRadius: '0.5rem', 
+                      border: 'none',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s'
+                    }}
                     onClick={resetForm}
                   >
                     취소
                   </button>
                   <button
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all"
+                    style={{ 
+                      padding: '0.5rem 1rem', 
+                      backgroundColor: '#2563eb', 
+                      color: 'white', 
+                      borderRadius: '0.5rem', 
+                      border: 'none',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s'
+                    }}
                     onClick={handleSaveCard}
                   >
                     {isEditing ? '수정하기' : '생성하기'}
@@ -367,49 +427,119 @@ export default function CardManagementPage() {
             </div>
             
             {/* 카드 목록 */}
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <h2 className="text-xl font-semibold mb-4">카드 목록</h2>
+            <div style={{ backgroundColor: 'white', borderRadius: '0.75rem', boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)', padding: '1.5rem' }}>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1rem' }}>카드 목록</h2>
+              
+              {/* 과목 필터 */}
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>과목별 필터링</label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <button
+                    style={{
+                      padding: '0.5rem 1rem',
+                      borderRadius: '0.5rem',
+                      fontWeight: '500',
+                      fontSize: '0.875rem',
+                      backgroundColor: selectedSubject === '전체' ? '#3b82f6' : '#f3f4f6',
+                      color: selectedSubject === '전체' ? 'white' : '#374151',
+                      border: 'none',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => setSelectedSubject('전체')}
+                  >
+                    전체
+                  </button>
+                  {subjects.map(subject => (
+                    <button
+                      key={subject}
+                      style={{
+                        padding: '0.5rem 1rem',
+                        borderRadius: '0.5rem',
+                        fontWeight: '500',
+                        fontSize: '0.875rem',
+                        backgroundColor: selectedSubject === subject ? '#3b82f6' : '#f3f4f6',
+                        color: selectedSubject === subject ? 'white' : '#374151',
+                        border: 'none',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => setSelectedSubject(subject)}
+                    >
+                      {subject}
+                    </button>
+                  ))}
+                </div>
+              </div>
               
               {cards.length === 0 ? (
-                <div className="text-center py-10 text-gray-500">
+                <div style={{ textAlign: 'center', padding: '2.5rem 0', color: '#6b7280' }}>
                   생성된 카드가 없습니다. 새 카드를 만들어보세요.
                 </div>
               ) : (
-                <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
-                  {cards.map(card => (
+                <div style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', 
+                  gap: '1rem', 
+                  maxHeight: '600px', 
+                  overflowY: 'auto', 
+                  paddingRight: '0.5rem' 
+                }}>
+                  {cards
+                    .filter(card => selectedSubject === '전체' || card.subject === selectedSubject)
+                    .map(card => (
                     <div 
                       key={card.id} 
-                      className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all"
-                      style={{ borderLeft: `6px solid ${card.color}` }}
+                      style={{ 
+                        border: '1px solid #e5e7eb', 
+                        borderLeft: `6px solid ${card.color}`, 
+                        borderRadius: '0.5rem', 
+                        padding: '1rem', 
+                        transition: 'all 0.2s',
+                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+                        cursor: 'pointer'
+                      }}
                     >
-                      <div className="flex justify-between items-start">
-                        <div className="flex items-center gap-3">
-                          <span className="text-3xl">{card.icon}</span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                          <span style={{ fontSize: '1.875rem' }}>{card.icon}</span>
                           <div>
-                            <h3 className="font-semibold text-lg">{card.title}</h3>
-                            <p className="text-sm text-gray-500">{card.subject} / {card.category}</p>
+                            <h3 style={{ fontWeight: '600', fontSize: '1.125rem' }}>{card.title}</h3>
+                            <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>{card.subject} / {card.category}</p>
                           </div>
                         </div>
-                        <div className="flex space-x-2">
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
                           <button
-                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-full"
+                            style={{ 
+                              padding: '0.5rem', 
+                              color: '#2563eb', 
+                              borderRadius: '9999px', 
+                              border: 'none',
+                              backgroundColor: 'transparent',
+                              cursor: 'pointer'
+                            }}
                             onClick={() => handleEditCard(card)}
                           >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" style={{ height: '1.25rem', width: '1.25rem' }} viewBox="0 0 20 20" fill="currentColor">
                               <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                             </svg>
                           </button>
                           <button
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-full"
+                            style={{ 
+                              padding: '0.5rem', 
+                              color: '#dc2626', 
+                              borderRadius: '9999px', 
+                              border: 'none',
+                              backgroundColor: 'transparent',
+                              cursor: 'pointer'
+                            }}
                             onClick={() => handleDeleteCard(card.id)}
                           >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" style={{ height: '1.25rem', width: '1.25rem' }} viewBox="0 0 20 20" fill="currentColor">
                               <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
                             </svg>
                           </button>
                         </div>
                       </div>
-                      <p className="mt-2 text-gray-700">{card.description}</p>
+                      <p style={{ marginTop: '0.5rem', color: '#374151' }}>{card.description}</p>
                     </div>
                   ))}
                 </div>
