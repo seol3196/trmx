@@ -21,20 +21,30 @@ export default function Login() {
     setError(null);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      // 로그인 시도
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
+        console.error('로그인 에러:', error);
         setError(error.message);
         return;
       }
 
-      router.push('/dashboard');
-      router.refresh();
+      if (data.session) {
+        // 세션 정보 명시적으로 저장
+        console.log('로그인 성공, 세션 정보 있음');
+        
+        // 페이지 이동
+        router.push('/dashboard');
+      } else {
+        console.error('세션이 생성되지 않음');
+        setError('로그인은 성공했지만 세션이 생성되지 않았습니다.');
+      }
     } catch (err) {
-      console.error('로그인 에러:', err);
+      console.error('로그인 예외 발생:', err);
       setError('로그인 중 오류가 발생했습니다.');
     } finally {
       setLoading(false);

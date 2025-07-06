@@ -1,0 +1,262 @@
+/**
+ * IndexedDB를 사용하여 오프라인 캐시를 구현하는 유틸리티 함수
+ */
+
+const DB_NAME = 'clicknote-db';
+const DB_VERSION = 1;
+const RECORDS_STORE = 'records';
+const SYNC_QUEUE_STORE = 'syncQueue';
+
+// 동기화 작업 타입
+export interface SyncQueueItem {
+  id?: string;
+  operation: 'create' | 'delete' | 'update';
+  data: any;
+  timestamp: number;
+}
+
+// 카드 기록 타입
+export interface CardRecord {
+  id: string;
+  studentId: string;
+  cardId?: string;
+  subject?: string;
+  memo: string;
+  recordedDate: Date;
+  serverSynced?: boolean;
+}
+
+// IndexedDB 연결 가져오기
+const getDB = (): Promise<IDBDatabase> => {
+  return new Promise((resolve, reject) => {
+    if (!window.indexedDB) {
+      reject(new Error('이 브라우저는 IndexedDB를 지원하지 않습니다.'));
+      return;
+    }
+    
+    const request = window.indexedDB.open(DB_NAME, DB_VERSION);
+    
+    request.onerror = (event) => {
+      reject(new Error('IndexedDB 연결 오류: ' + (event.target as any).errorCode));
+    };
+    
+    request.onsuccess = (event) => {
+      resolve((event.target as IDBOpenDBRequest).result);
+    };
+    
+    request.onupgradeneeded = (event) => {
+      const db = (event.target as IDBOpenDBRequest).result;
+      
+      // 기록 저장소 생성
+      if (!db.objectStoreNames.contains(RECORDS_STORE)) {
+        db.createObjectStore(RECORDS_STORE, { keyPath: 'id' });
+      }
+      
+      // 동기화 큐 저장소 생성
+      if (!db.objectStoreNames.contains(SYNC_QUEUE_STORE)) {
+        const syncQueueStore = db.createObjectStore(SYNC_QUEUE_STORE, { keyPath: 'id', autoIncrement: true });
+        syncQueueStore.createIndex('timestamp', 'timestamp', { unique: false });
+      }
+    };
+  });
+};
+
+// 기록 저장
+export const saveRecord = async (record: CardRecord, skipQueue: boolean = false): Promise<string> => {
+  const db = await getDB();
+  
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([RECORDS_STORE], 'readwrite');
+    const store = transaction.objectStore(RECORDS_STORE);
+    
+    // 날짜 객체를 ISO 문자열로 변환
+    const recordToSave = {
+      ...record,
+      recordedDate: record.recordedDate instanceof Date
+        ? record.recordedDate.toISOString()
+        : record.recordedDate
+    };
+    
+    const request = store.put(recordToSave);
+    
+    request.onsuccess = () => {
+      resolve(record.id);
+    };
+    
+    request.onerror = (event) => {
+      reject(new Error('기록 저장 오류: ' + (event.target as any).error));
+    };
+  });
+};
+
+// 기록 가져오기
+export const getRecords = async (): Promise<CardRecord[]> => {
+  const db = await getDB();
+  
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([RECORDS_STORE], 'readonly');
+    const store = transaction.objectStore(RECORDS_STORE);
+    const request = store.getAll();
+    
+    request.onsuccess = (event) => {
+      const records = (event.target as IDBRequest).result;
+      
+      // ISO 문자열을 Date 객체로 변환
+      const recordsWithDates = records.map((record: any) => ({
+        ...record,
+        recordedDate: new Date(record.recordedDate)
+      }));
+      
+      resolve(recordsWithDates);
+    };
+    
+    request.onerror = (event) => {
+      reject(new Error('기록 가져오기 오류: ' + (event.target as any).error));
+    };
+  });
+};
+
+// 기록 삭제
+export const deleteRecord = async (id: string): Promise<void> => {
+  const db = await getDB();
+  
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([RECORDS_STORE], 'readwrite');
+    const store = transaction.objectStore(RECORDS_STORE);
+    const request = store.delete(id);
+    
+    request.onsuccess = () => {
+      resolve();
+    };
+    
+    request.onerror = (event) => {
+      reject(new Error('기록 삭제 오류: ' + (event.target as any).error));
+    };
+  });
+};
+
+// 동기화 큐에 항목 추가
+export const addToSyncQueue = async (item: SyncQueueItem): Promise<string> => {
+  const db = await getDB();
+  
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([SYNC_QUEUE_STORE], 'readwrite');
+    const store = transaction.objectStore(SYNC_QUEUE_STORE);
+    
+    const itemToSave = {
+      ...item,
+      timestamp: Date.now()
+    };
+    
+    const request = store.add(itemToSave);
+    
+    request.onsuccess = (event) => {
+      resolve((event.target as IDBRequest).result as string);
+    };
+    
+    request.onerror = (event) => {
+      reject(new Error('동기화 큐 추가 오류: ' + (event.target as any).error));
+    };
+  });
+};
+
+// 동기화 큐에서 항목 가져오기
+export const getSyncQueue = async (): Promise<SyncQueueItem[]> => {
+  const db = await getDB();
+  
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([SYNC_QUEUE_STORE], 'readonly');
+    const store = transaction.objectStore(SYNC_QUEUE_STORE);
+    const request = store.getAll();
+    
+    request.onsuccess = (event) => {
+      resolve((event.target as IDBRequest).result);
+    };
+    
+    request.onerror = (event) => {
+      reject(new Error('동기화 큐 가져오기 오류: ' + (event.target as any).error));
+    };
+  });
+};
+
+// 동기화 큐에서 항목 제거
+export const removeFromSyncQueue = async (item: SyncQueueItem): Promise<void> => {
+  const db = await getDB();
+  
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([SYNC_QUEUE_STORE], 'readwrite');
+    const store = transaction.objectStore(SYNC_QUEUE_STORE);
+    const request = store.delete(item.id as string);
+    
+    request.onsuccess = () => {
+      resolve();
+    };
+    
+    request.onerror = (event) => {
+      reject(new Error('동기화 큐 항목 제거 오류: ' + (event.target as any).error));
+    };
+  });
+};
+
+// 기록의 동기화 상태 업데이트
+export const updateRecordSyncStatus = async (id: string, synced: boolean): Promise<void> => {
+  const db = await getDB();
+  
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([RECORDS_STORE], 'readwrite');
+    const store = transaction.objectStore(RECORDS_STORE);
+    const getRequest = store.get(id);
+    
+    getRequest.onsuccess = () => {
+      const record = getRequest.result;
+      
+      if (record) {
+        record.serverSynced = synced;
+        const updateRequest = store.put(record);
+        
+        updateRequest.onsuccess = () => {
+          resolve();
+        };
+        
+        updateRequest.onerror = (event) => {
+          reject(new Error('기록 동기화 상태 업데이트 오류: ' + (event.target as any).error));
+        };
+      } else {
+        reject(new Error('기록을 찾을 수 없음: ' + id));
+      }
+    };
+    
+    getRequest.onerror = (event) => {
+      reject(new Error('기록 가져오기 오류: ' + (event.target as any).error));
+    };
+  });
+};
+
+// 모든 데이터 삭제 (개발용)
+export const clearAllData = async (): Promise<void> => {
+  const db = await getDB();
+  
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([RECORDS_STORE, SYNC_QUEUE_STORE], 'readwrite');
+    const recordsStore = transaction.objectStore(RECORDS_STORE);
+    const syncQueueStore = transaction.objectStore(SYNC_QUEUE_STORE);
+    
+    const recordsClearRequest = recordsStore.clear();
+    const syncQueueClearRequest = syncQueueStore.clear();
+    
+    let completed = 0;
+    const checkComplete = () => {
+      completed++;
+      if (completed === 2) {
+        resolve();
+      }
+    };
+    
+    recordsClearRequest.onsuccess = checkComplete;
+    syncQueueClearRequest.onsuccess = checkComplete;
+    
+    transaction.onerror = (event) => {
+      reject(new Error('데이터 삭제 오류: ' + (event.target as any).error));
+    };
+  });
+}; 
