@@ -1,5 +1,14 @@
 import { NextResponse } from 'next/server';
-import { createServerClient } from '../../../lib/supabase';
+import { createClient } from '@supabase/supabase-js';
+
+// Supabase 서버 클라이언트 생성 (서비스 롤 사용)
+const createServerClient = () => {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://kbnskzykzornnvjoknry.supabase.co';
+  // 서비스 롤 키는 RLS를 우회할 수 있음
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtibnNrenlrem9ybm52am9rbnJ5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MTcyMzU3MSwiZXhwIjoyMDY3Mjk5NTcxfQ.qov51H7Hdx73j47kGQwaZRPakePSu-6sGFaVPwEArSo';
+  
+  return createClient(supabaseUrl, supabaseServiceKey);
+};
 
 // 유효한 사용자 ID를 얻는 함수
 async function getValidUserId() {

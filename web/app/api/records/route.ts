@@ -1,5 +1,14 @@
 import { NextResponse } from 'next/server';
-import { createServerClient } from '../../../lib/supabase';
+import { createClient } from '@supabase/supabase-js';
+
+// Supabase 서버 클라이언트 생성 (서비스 롤 사용)
+const createServerClient = () => {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://kbnskzykzornnvjoknry.supabase.co';
+  // 서비스 롤 키는 RLS를 우회할 수 있음
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtibnNrenlrem9ybm52am9rbnJ5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MTcyMzU3MSwiZXhwIjoyMDY3Mjk5NTcxfQ.qov51H7Hdx73j47kGQwaZRPakePSu-6sGFaVPwEArSo';
+  
+  return createClient(supabaseUrl, supabaseServiceKey);
+};
 
 // 유효한 사용자 ID를 얻는 함수
 async function getValidUserId() {
@@ -34,37 +43,6 @@ async function getValidUserId() {
 export async function GET() {
   try {
     const supabase = createServerClient();
-    
-    // 테이블이 존재하는지 확인하고 없으면 생성
-    try {
-      // 테이블 존재 여부 확인
-      const { error: checkError } = await supabase.from('card_records').select('id').limit(1);
-      
-      if (checkError && checkError.code === '42P01') { // 테이블이 존재하지 않음
-        console.log('card_records 테이블이 존재하지 않습니다. 생성합니다...');
-        
-        // 테이블 생성 요청 - 서버 측에서 처리하도록 API 호출
-        try {
-          const response = await fetch('/api/setup-db', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ action: 'create_card_records_table' }),
-          });
-          
-          if (!response.ok) {
-            console.error('테이블 생성 API 오류:', await response.text());
-          } else {
-            console.log('card_records 테이블 생성 요청 완료');
-          }
-        } catch (apiError) {
-          console.error('테이블 생성 API 호출 오류:', apiError);
-        }
-      }
-    } catch (tableError) {
-      console.error('테이블 확인/생성 오류:', tableError);
-    }
     
     // 기록 데이터 가져오기
     const { data: records, error } = await supabase
