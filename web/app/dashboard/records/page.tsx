@@ -179,7 +179,7 @@ export default function RecordsPage() {
   const subjects = Array.from(new Set(records.map(record => record.subject)));
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-4 max-w-full">
       <h1 className="text-2xl font-bold mb-6">기록 목록</h1>
       
       {isLoading ? (
@@ -252,30 +252,30 @@ export default function RecordsPage() {
           </div>
           
           {/* 기록 목록 */}
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
+          <div className="bg-white rounded-lg shadow w-full">
+            <div className="w-full overflow-x-auto">
+              <table className="w-full table-auto">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-base font-medium text-gray-700 uppercase tracking-wider">
                       날짜
                     </th>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-base font-medium text-gray-700 uppercase tracking-wider">
                       학생
                     </th>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-base font-medium text-gray-700 uppercase tracking-wider">
                       과목
                     </th>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-base font-medium text-gray-700 uppercase tracking-wider">
                       카드
                     </th>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-base font-medium text-gray-700 uppercase tracking-wider">
                       메모
                     </th>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-base font-medium text-gray-700 uppercase tracking-wider">
                       동기화
                     </th>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-base font-medium text-gray-700 uppercase tracking-wider">
                       작업
                     </th>
                   </tr>
