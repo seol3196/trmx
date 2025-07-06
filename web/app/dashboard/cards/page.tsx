@@ -33,10 +33,11 @@ interface CardRecord {
 export default function CardsPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [cards, setCards] = useState<Card[]>([]);
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [selectedStudents, setSelectedStudents] = useState<Student[]>([]);
   const [selectedSubject, setSelectedSubject] = useState<string>('공통');
   const [memo, setMemo] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
 
   // 데이터 로드
   useEffect(() => {
@@ -76,75 +77,145 @@ export default function CardsPage() {
     loadData();
   }, []);
 
+  // 학생 선택 토글 처리
+  const toggleStudentSelection = (student: Student) => {
+    setSelectedStudents(prev => {
+      // 이미 선택된 학생인지 확인
+      const isAlreadySelected = prev.some(s => s.id === student.id);
+      
+      if (isAlreadySelected) {
+        // 이미 선택된 학생이면 제거
+        return prev.filter(s => s.id !== student.id);
+      } else {
+        // 선택되지 않은 학생이면 추가
+        return [...prev, student];
+      }
+    });
+  };
+
   // 카드 클릭 처리
   const handleCardClick = async (card: Card) => {
-    if (!selectedStudent) return;
+    if (selectedStudents.length === 0) {
+      alert('최소 한 명 이상의 학생을 선택해주세요.');
+      return;
+    }
+    
+    setIsSaving(true);
     
     try {
-      const newRecord = {
-        id: '',
-        studentId: selectedStudent.id,
-        cardId: card.id,
-        subject: selectedSubject,
-        memo: memo || card.description,
-        recordedDate: new Date()
-      };
+      const successfulStudents: string[] = [];
+      const failedStudents: string[] = [];
       
-      // API를 통해 기록 저장
-      const response = await fetch('/api/records', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newRecord)
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || '기록 저장 중 오류가 발생했습니다.');
+      // 선택된 모든 학생에 대해 기록 저장
+      for (const student of selectedStudents) {
+        const newRecord = {
+          id: '',
+          studentId: student.id,
+          cardId: card.id,
+          subject: selectedSubject,
+          memo: memo || card.description,
+          recordedDate: new Date()
+        };
+        
+        try {
+          // API를 통해 기록 저장
+          const response = await fetch('/api/records', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(newRecord)
+          });
+          
+          if (response.ok) {
+            successfulStudents.push(student.name);
+          } else {
+            failedStudents.push(student.name);
+          }
+        } catch (error) {
+          console.error(`${student.name} 학생 기록 저장 오류:`, error);
+          failedStudents.push(student.name);
+        }
       }
       
-      // 성공 메시지
-      alert(`${selectedStudent.name} 학생에 대한 "${card.title}" 카드가 저장되었습니다.`);
+      // 결과 메시지 표시
+      if (successfulStudents.length > 0) {
+        const studentNames = successfulStudents.join(', ');
+        alert(`${studentNames} 학생에 대한 "${card.title}" 카드가 저장되었습니다.`);
+      }
+      
+      if (failedStudents.length > 0) {
+        const failedNames = failedStudents.join(', ');
+        alert(`${failedNames} 학생에 대한 카드 저장에 실패했습니다.`);
+      }
     } catch (error) {
       console.error('카드 저장 오류:', error);
       alert('카드 저장 중 오류가 발생했습니다.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
   // 메모만 저장 처리
   const handleMemoSave = async () => {
-    if (!selectedStudent || !memo) return;
+    if (selectedStudents.length === 0 || !memo) {
+      alert('최소 한 명 이상의 학생을 선택하고 메모를 입력해주세요.');
+      return;
+    }
+    
+    setIsSaving(true);
     
     try {
-      const newRecord = {
-        id: '',
-        studentId: selectedStudent.id,
-        cardId: '',
-        subject: selectedSubject,
-        memo: memo,
-        recordedDate: new Date()
-      };
+      const successfulStudents: string[] = [];
+      const failedStudents: string[] = [];
       
-      // API를 통해 기록 저장
-      const response = await fetch('/api/records', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newRecord)
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || '메모 저장 중 오류가 발생했습니다.');
+      // 선택된 모든 학생에 대해 메모 저장
+      for (const student of selectedStudents) {
+        const newRecord = {
+          id: '',
+          studentId: student.id,
+          cardId: '',
+          subject: selectedSubject,
+          memo: memo,
+          recordedDate: new Date()
+        };
+        
+        try {
+          // API를 통해 기록 저장
+          const response = await fetch('/api/records', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(newRecord)
+          });
+          
+          if (response.ok) {
+            successfulStudents.push(student.name);
+          } else {
+            failedStudents.push(student.name);
+          }
+        } catch (error) {
+          console.error(`${student.name} 학생 메모 저장 오류:`, error);
+          failedStudents.push(student.name);
+        }
       }
       
-      // 성공 메시지
-      alert(`${selectedStudent.name} 학생에 대한 메모가 저장되었습니다.`);
+      // 결과 메시지 표시
+      if (successfulStudents.length > 0) {
+        const studentNames = successfulStudents.join(', ');
+        alert(`${studentNames} 학생에 대한 메모가 저장되었습니다.`);
+      }
+      
+      if (failedStudents.length > 0) {
+        const failedNames = failedStudents.join(', ');
+        alert(`${failedNames} 학생에 대한 메모 저장에 실패했습니다.`);
+      }
     } catch (error) {
       console.error('메모 저장 오류:', error);
       alert('메모 저장 중 오류가 발생했습니다.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -153,6 +224,11 @@ export default function CardsPage() {
   
   // 과목 목록 생성
   const subjects = Array.from(new Set(cards.map(card => card.subject)));
+
+  // 선택된 학생 수 표시 텍스트
+  const selectedStudentsText = selectedStudents.length > 0 
+    ? `${selectedStudents.length}명 선택됨` 
+    : '학생을 선택하세요';
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb', padding: '1.5rem 0' }}>
@@ -168,50 +244,65 @@ export default function CardsPage() {
           <div style={{ backgroundColor: 'white', borderRadius: '0.75rem', boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)', padding: '1.5rem' }}>
             {/* 학생 선택 */}
             <div style={{ marginBottom: '2rem' }}>
-              <h2 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '0.75rem' }}>학생 선택</h2>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <h2 style={{ fontSize: '1.125rem', fontWeight: '600' }}>학생 선택</h2>
+                <span style={{ 
+                  fontSize: '0.875rem', 
+                  fontWeight: '500', 
+                  color: selectedStudents.length > 0 ? '#2563eb' : '#6b7280',
+                  backgroundColor: selectedStudents.length > 0 ? '#dbeafe' : '#f3f4f6',
+                  padding: '0.25rem 0.75rem',
+                  borderRadius: '9999px'
+                }}>
+                  {selectedStudentsText}
+                </span>
+              </div>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <tbody>
                   {Array.from({ length: Math.ceil(students.length / 6) }).map((_, rowIndex) => (
                     <tr key={rowIndex}>
-                      {students.slice(rowIndex * 6, rowIndex * 6 + 6).map(student => (
-                        <td key={student.id} style={{ padding: '0.25rem', width: '16.666%' }}>
-                          <button
-                            style={{
-                              display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              padding: '0.75rem 0.25rem',
-                              borderRadius: '0.5rem',
-                              boxShadow: selectedStudent?.id === student.id ? '0 4px 6px -1px rgba(0, 0, 0, 0.1)' : '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-                              transition: 'all 0.2s',
-                              height: '6rem',
-                              width: '100%',
-                              backgroundColor: selectedStudent?.id === student.id ? '#1e3a8a' : 'white',
-                              border: selectedStudent?.id === student.id ? '2px solid #eab308' : '1px solid #e5e7eb',
-                              transform: selectedStudent?.id === student.id ? 'scale(1.05)' : 'scale(1)',
-                              cursor: 'pointer'
-                            }}
-                            onClick={() => setSelectedStudent(student)}
-                          >
-                            <span style={{ 
-                              fontSize: '1.125rem', 
-                              fontWeight: 'bold', 
-                              color: selectedStudent?.id === student.id ? '#facc15' : '#374151'
-                            }}>
-                              {student.name}
-                            </span>
-                            <span style={{ 
-                              fontSize: '0.875rem', 
-                              marginTop: '0.25rem', 
-                              fontWeight: '500', 
-                              color: selectedStudent?.id === student.id ? '#fef08a' : '#6b7280'
-                            }}>
-                              {student.student_number}번
-                            </span>
-                          </button>
-                        </td>
-                      ))}
+                      {students.slice(rowIndex * 6, rowIndex * 6 + 6).map(student => {
+                        const isSelected = selectedStudents.some(s => s.id === student.id);
+                        return (
+                          <td key={student.id} style={{ padding: '0.25rem', width: '16.666%' }}>
+                            <button
+                              style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                padding: '0.75rem 0.25rem',
+                                borderRadius: '0.5rem',
+                                boxShadow: isSelected ? '0 4px 6px -1px rgba(0, 0, 0, 0.1)' : '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                                transition: 'all 0.2s',
+                                height: '6rem',
+                                width: '100%',
+                                backgroundColor: isSelected ? '#1e3a8a' : 'white',
+                                border: isSelected ? '2px solid #eab308' : '1px solid #e5e7eb',
+                                transform: isSelected ? 'scale(1.05)' : 'scale(1)',
+                                cursor: 'pointer'
+                              }}
+                              onClick={() => toggleStudentSelection(student)}
+                            >
+                              <span style={{ 
+                                fontSize: '1.125rem', 
+                                fontWeight: 'bold', 
+                                color: isSelected ? '#facc15' : '#374151'
+                              }}>
+                                {student.name}
+                              </span>
+                              <span style={{ 
+                                fontSize: '0.875rem', 
+                                marginTop: '0.25rem', 
+                                fontWeight: '500', 
+                                color: isSelected ? '#fef08a' : '#6b7280'
+                              }}>
+                                {student.student_number}번
+                              </span>
+                            </button>
+                          </td>
+                        );
+                      })}
                       {/* Fill empty cells to maintain 6 columns */}
                       {Array.from({ length: 6 - (students.slice(rowIndex * 6, rowIndex * 6 + 6).length) }).map((_, i) => (
                         <td key={`empty-${i}`} style={{ padding: '0.25rem', width: '16.666%' }}></td>
@@ -274,7 +365,7 @@ export default function CardsPage() {
                     width: '100%',
                     boxSizing: 'border-box'
                   }}
-                  placeholder="추가 메모를 입력하세요..."
+                  placeholder="활동 내용 또는 추가 메모를 입력하세요..."
                   value={memo}
                   onChange={(e) => setMemo(e.target.value)}
                   rows={3}
@@ -288,8 +379,8 @@ export default function CardsPage() {
                       borderRadius: '0.5rem', 
                       boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', 
                       transition: 'all 0.2s', 
-                      opacity: (!selectedStudent || !memo) ? '0.5' : '1',
-                      cursor: (!selectedStudent || !memo) ? 'not-allowed' : 'pointer',
+                      opacity: (selectedStudents.length === 0 || !memo || isSaving) ? '0.5' : '1',
+                      cursor: (selectedStudents.length === 0 || !memo || isSaving) ? 'not-allowed' : 'pointer',
                       fontSize: '0.75rem', 
                       fontWeight: 'bold', 
                       border: '1px solid #15803d',
@@ -300,9 +391,9 @@ export default function CardsPage() {
                       height: '24px'
                     }}
                     onClick={handleMemoSave}
-                    disabled={!selectedStudent || !memo}
+                    disabled={selectedStudents.length === 0 || !memo || isSaving}
                   >
-                    메모만 저장
+                    {isSaving ? '저장 중...' : '메모만 저장'}
                   </button>
                 </div>
               </div>
@@ -313,34 +404,35 @@ export default function CardsPage() {
               <h2 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '0.75rem' }}>카드 선택</h2>
               <div style={{ 
                 display: 'grid', 
-                gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', 
-                gap: '1rem'
+                gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', 
+                gap: '0.5rem'
               }}>
                 {filteredCards.map(card => (
                   <div
                     key={card.id}
                     style={{ 
                       border: '1px solid #e5e7eb', 
-                      borderLeft: `6px solid ${card.color}`, 
-                      borderRadius: '0.5rem', 
+                      borderLeft: `4px solid ${card.color}`, 
+                      borderRadius: '0.375rem', 
                       overflow: 'hidden', 
                       boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', 
-                      cursor: 'pointer', 
+                      cursor: selectedStudents.length > 0 && !isSaving ? 'pointer' : 'not-allowed', 
                       transition: 'all 0.2s',
-                      backgroundColor: 'white'
+                      backgroundColor: 'white',
+                      opacity: selectedStudents.length > 0 && !isSaving ? '1' : '0.7'
                     }}
-                    onClick={() => handleCardClick(card)}
+                    onClick={() => !isSaving && handleCardClick(card)}
                   >
-                    <div style={{ padding: '1.25rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-                        <span style={{ fontSize: '2.25rem' }}>{card.icon}</span>
-                        <h3 style={{ fontWeight: '600', fontSize: '1.125rem', color: '#1f2937' }}>{card.title}</h3>
+                    <div style={{ padding: '0.75rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', marginBottom: '0.5rem' }}>
+                        <span style={{ fontSize: '1.5rem' }}>{card.icon}</span>
+                        <h3 style={{ fontWeight: '600', fontSize: '0.875rem', color: '#1f2937' }}>{card.title}</h3>
                       </div>
-                      <p style={{ fontSize: '1rem', color: '#4b5563', marginBottom: '1rem' }}>{card.description}</p>
-                      <div style={{ marginTop: '0.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <p style={{ fontSize: '0.75rem', color: '#4b5563', marginBottom: '0.5rem', maxHeight: '2.5rem', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{card.description}</p>
+                      <div style={{ marginTop: '0.375rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span style={{ 
-                          fontSize: '0.875rem', 
-                          padding: '0.375rem 1rem', 
+                          fontSize: '0.7rem', 
+                          padding: '0.125rem 0.5rem', 
                           backgroundColor: '#f3f4f6', 
                           borderRadius: '9999px', 
                           color: '#4b5563', 
