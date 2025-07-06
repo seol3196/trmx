@@ -38,6 +38,9 @@ export default function DashboardLayout({
               <Link href="/dashboard/records" className="text-gray-600 hover:text-blue-600">
                 기록 조회
               </Link>
+              <Link href="/dashboard/card-management" className="text-gray-600 hover:text-blue-600">
+                카드 관리
+              </Link>
             </div>
           </div>
         </div>

@@ -183,15 +183,15 @@ export default function CardsPage() {
                           <button
                             className={`flex flex-col items-center justify-center py-3 px-1 rounded-lg shadow-sm transition-all duration-200 h-24 w-full ${
                               selectedStudent?.id === student.id
-                                ? 'bg-blue-500 text-white shadow-md transform scale-105'
+                                ? 'bg-blue-900 text-white shadow-md transform scale-105 border-2 border-yellow-400'
                                 : 'bg-white border border-gray-200 hover:bg-gray-50 hover:border-blue-300'
                             }`}
                             onClick={() => setSelectedStudent(student)}
                           >
-                            <span className={`text-lg font-medium ${selectedStudent?.id === student.id ? 'text-white' : 'text-gray-700'}`}>
+                            <span className={`text-lg font-bold ${selectedStudent?.id === student.id ? 'text-yellow-300' : 'text-gray-700'}`}>
                               {student.name}
                             </span>
-                            <span className={`text-sm mt-1 ${selectedStudent?.id === student.id ? 'text-blue-100' : 'text-gray-500'}`}>
+                            <span className={`text-sm mt-1 font-medium ${selectedStudent?.id === student.id ? 'text-yellow-200' : 'text-gray-500'}`}>
                               {student.student_number}번
                             </span>
                           </button>
@@ -210,11 +210,11 @@ export default function CardsPage() {
             {/* 과목 선택 */}
             <div className="mb-8">
               <h2 className="text-lg font-semibold mb-3">과목 선택</h2>
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-4">
                 {subjects.map(subject => (
                   <button
                     key={subject}
-                    className={`px-6 py-4 rounded-lg font-medium transition-all duration-200 text-lg ${
+                    className={`w-64 h-14 flex items-center justify-center rounded-lg font-medium transition-all duration-200 text-base ${
                       selectedSubject === subject
                         ? 'bg-blue-500 text-white shadow-md transform scale-105'
                         : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-blue-300'
@@ -232,23 +232,19 @@ export default function CardsPage() {
               <h2 className="text-lg font-semibold mb-3">메모 (선택사항)</h2>
               <div className="flex flex-col md:flex-row gap-4">
                 <textarea
-                  className="flex-1 p-4 border border-gray-200 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-500 outline-none transition-all text-base"
+                  className="flex-1 p-3 border border-gray-200 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-500 outline-none transition-all text-sm md:w-4/5"
                   placeholder="추가 메모를 입력하세요..."
                   value={memo}
                   onChange={(e) => setMemo(e.target.value)}
-                  rows={4}
+                  rows={3}
                 ></textarea>
                 <button
-                  className="px-6 py-4 bg-green-500 text-white rounded-lg shadow hover:bg-green-600 hover:shadow-md transition-all duration-200 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed text-lg md:self-end"
+                  className="px-2 py-0.5 bg-green-900 text-yellow-300 rounded-lg shadow hover:bg-green-800 hover:shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-bold md:self-end border border-green-700 inline-flex items-center justify-center"
+                  style={{ minWidth: "90px" }}
                   onClick={handleMemoSave}
                   disabled={!selectedStudent || !memo}
                 >
-                  <span className="flex items-center justify-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    메모만 저장
-                  </span>
+                  메모만 저장
                 </button>
               </div>
             </div>
