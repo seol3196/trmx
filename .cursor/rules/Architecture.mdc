@@ -1,0 +1,68 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# ClickNote Project Architecture
+
+## Project Overview
+ClickNote is an application that allows teachers to easily record student observations through clicks or touches. The application aims to increase work efficiency through a convenient card-based interface and AI recommendation features, facilitating the collection and analysis of student observation data.
+
+## Tech Stack
+- **Frontend**: Next.js (React), React Native for mobile
+- **Backend**: Supabase (PostgreSQL, Auth, Storage)
+- **AI Service**: OpenAI GPT API or open-source alternatives
+- **Development Tools**: TypeScript, ESLint, Prettier, Husky
+
+## Directory Structure
+- `web/`: Web application using Next.js
+  - `app/`: Next.js app router
+  - `components/`: Reusable React components
+  - `lib/`: Library code and API clients
+  - `utils/`: Utility functions
+  - `public/`: Static assets
+
+- `mobile/`: Mobile application using React Native (planned)
+
+- `packages/`: Shared packages across applications
+  - `ui/`: Common UI components
+  - `types/`: TypeScript type definitions
+  - `utils/`: Shared utility functions
+
+- `infra/`: Infrastructure related code
+  - Contains Supabase configuration and migrations
+
+## Naming Conventions
+- **Components**: PascalCase (e.g., `StudentCard.tsx`)
+- **Utility files**: camelCase (e.g., `formatDate.ts`)
+- **Constants**: UPPER_SNAKE_CASE (e.g., `MAX_STUDENTS`)
+- **API endpoints**: kebab-case (e.g., `/api/student-notes`)
+
+## Import Order
+1. React and Next.js imports
+2. External libraries
+3. Internal packages/components
+4. Type imports
+5. Styles/CSS
+
+## File Structure for Components
+```tsx
+// 1. Imports
+import { useState } from 'react';
+
+// 2. Types
+type Props = {
+  // props definition
+};
+
+// 3. Component
+export default function ComponentName({ prop1, prop2 }: Props) {
+  // component logic and state
+
+  // 4. Return JSX
+  return (
+    // JSX content
+  );
+}
+```
+

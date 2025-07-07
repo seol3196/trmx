@@ -1,0 +1,46 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# ClickNote Development Rules
+
+This is a set of guidelines that should always be followed when working on the ClickNote project.
+
+## Project Fundamentals
+- ClickNote is a student observation app for teachers
+- Main goal: Make recording student observations quick and easy (3 clicks or less)
+- Technology stack: Next.js, React, TypeScript, Supabase, Tailwind CSS
+
+## Code Quality
+- Write clean, maintainable TypeScript code
+- Follow functional programming principles
+- Use proper typing for all variables and functions
+- Write unit tests for critical functionality
+- Optimize for performance and accessibility
+
+## Styling Guidelines
+- Use Tailwind CSS for styling components
+- Follow mobile-first approach for responsive design
+- Maintain consistent spacing and component sizing
+- Use semantic color naming
+
+## File Organization
+- Keep related files together
+- Follow appropriate naming conventions for each file type
+- Use proper directory structure as defined in Architecture.mdc
+
+## Data Handling
+- Use Supabase for data storage and authentication
+- Implement proper error handling for API calls
+- Use optimistic UI updates when appropriate
+- Ensure data consistency between client and server
+
+## Important References
+- See Architecture.mdc for detailed project structure
+- See CodingStyle.mdc for code style guidelines
+- See Supabase.mdc for database and backend patterns
+- See DomainKnowledge.mdc for domain-specific concepts
+
+For more specific guidelines on frontend component development, refer to FrontendComponentGuide.mdc.
+

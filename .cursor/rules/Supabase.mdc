@@ -1,0 +1,83 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Supabase Integration Guidelines
+
+## Authentication
+- Use Supabase Auth for user authentication
+- Implement proper session handling and token refresh
+- Store user session in a secure context
+- Handle auth state changes appropriately
+
+## Database
+- Use Supabase PostgreSQL for data storage
+- Follow these table naming conventions:
+  - Use singular nouns for table names (e.g., `student`, `note`)
+  - Use snake_case for column names (e.g., `first_name`, `last_login`)
+- Always implement Row Level Security (RLS) policies
+- Include appropriate indexes for frequently queried columns
+- Use foreign key constraints for relationships
+- Add created_at and updated_at timestamps to tables
+
+## Schema Design
+- Main tables:
+  - `user`: User profiles
+  - `student`: Student information
+  - `note`: Observation notes
+  - `category`: Note categories
+  - `version`: Version history for notes
+
+## API Patterns
+- Use Supabase client for data operations
+- Wrap Supabase calls in service functions
+- Handle errors properly with try/catch blocks
+- Use optimistic UI updates when appropriate
+
+## Sample Code
+
+### Auth Setup
+```typescript
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+// Sign in user
+const signIn = async (email: string, password: string) => {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+  
+  if (error) throw error;
+  return data;
+};
+```
+
+### Data Fetching
+```typescript
+const fetchStudents = async (classId: string) => {
+  const { data, error } = await supabase
+    .from('student')
+    .select('*')
+    .eq('class_id', classId)
+    .order('last_name', { ascending: true });
+  
+  if (error) throw error;
+  return data;
+};
+```
+
+### RLS Policy Example
+```sql
+-- Only allow users to see their own students
+CREATE POLICY "Users can view their own students" ON student
+  FOR SELECT USING (
+    auth.uid() = teacher_id
+  );
+```
+

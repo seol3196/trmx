@@ -1,0 +1,142 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Frontend Component Development Guide
+
+## Component Organization
+
+### UI Component Hierarchy
+- **Layouts**: Page-level layout components that define the overall structure
+- **Templates**: Reusable page templates for common page patterns
+- **Sections**: Larger sections of a page that combine multiple UI components
+- **Components**: Reusable UI building blocks (buttons, cards, inputs)
+- **Elements**: Smallest UI units (icons, badges, labels)
+
+### Component File Structure
+Place related files together:
+```
+Button/
+  ├── Button.tsx      // Component implementation
+  ├── Button.test.tsx // Tests
+  ├── Button.module.css // Component-specific styles (if not using Tailwind)
+  └── index.ts        // Re-export for cleaner imports
+```
+
+## Tailwind CSS Usage
+
+### Recommended Pattern
+- Use Tailwind utility classes directly in components
+- Extract common patterns to custom utility classes in `globals.css`
+- Use consistent spacing and sizing scales
+
+### Custom Class Creation
+When you find yourself repeating the same combinations of classes:
+```css
+@layer components {
+  .btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded;
+  }
+}
+```
+
+## Component Props
+
+### Props Best Practices
+- Use TypeScript interfaces to define props
+- Provide sensible defaults when appropriate
+- Document props with JSDoc comments
+- Use destructuring to access props
+
+```tsx
+interface ButtonProps {
+  /** The button's label text */
+  children: React.ReactNode;
+  /** The button's variant style */
+  variant?: 'primary' | 'secondary' | 'outline';
+  /** Whether the button is in a loading state */
+  isLoading?: boolean;
+  /** Click handler */
+  onClick?: () => void;
+}
+
+export function Button({
+  children,
+  variant = 'primary',
+  isLoading = false,
+  onClick,
+}: ButtonProps) {
+  // Component implementation
+}
+```
+
+## Responsive Design
+
+### Mobile-First Approach
+Start with mobile layout and add complexity for larger screens:
+```jsx
+<div className="p-4 md:p-6 lg:p-8">
+  {/* Content */}
+</div>
+```
+
+### Breakpoint System
+- `sm`: 640px and up
+- `md`: 768px and up
+- `lg`: 1024px and up
+- `xl`: 1280px and up
+- `2xl`: 1536px and up
+
+## Accessibility (a11y)
+
+### Semantic HTML
+Use the correct HTML elements for their intended purpose:
+- `<button>` for clickable actions
+- `<a>` for navigation links
+- `<input>`, `<select>`, etc. for form controls
+
+### ARIA Attributes
+Add ARIA attributes when necessary:
+```jsx
+<button
+  aria-label="Close dialog"
+  aria-pressed={isPressed}
+  onClick={onClose}
+>
+  <CloseIcon />
+</button>
+```
+
+### Focus Management
+- Ensure keyboard navigation works
+- Maintain focus trapping in modals
+- Provide visible focus indicators
+
+## Testing Components
+
+### Component Test Structure
+```tsx
+describe('Button', () => {
+  it('renders correctly', () => {
+    // Arrange
+    render(<Button>Click me</Button>);
+    
+    // Assert
+    expect(screen.getByRole('button')).toHaveTextContent('Click me');
+  });
+  
+  it('calls onClick when clicked', () => {
+    // Arrange
+    const handleClick = jest.fn();
+    render(<Button onClick={handleClick}>Click me</Button>);
+    
+    // Act
+    fireEvent.click(screen.getByRole('button'));
+    
+    // Assert
+    expect(handleClick).toHaveBeenCalledTimes(1);
+  });
+});
+```
+

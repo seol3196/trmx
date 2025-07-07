@@ -1,0 +1,46 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Student Observation System - Domain Knowledge
+
+## Core Concepts
+
+### Student Observation
+Student observation is a systematic process of recording student behaviors, achievements, and learning patterns to inform educational decisions and provide feedback. In the context of this app, observations are quick notes that teachers can make throughout the day.
+
+### Observation Categories
+- **Academic Performance**: Notes related to academic achievement, class participation, and learning progress
+- **Social Behavior**: Interactions with peers and teachers, social skills, and collaboration abilities
+- **Emotional Well-being**: Emotional state, self-regulation, and stress management
+- **Special Achievements**: Notable accomplishments, improvements, or breakthroughs
+- **Areas for Improvement**: Specific skills or behaviors that need attention or development
+
+### Card System
+The app uses a card-based system where teachers can quickly select predefined observation templates and customize them with minimal input. This approach aims to reduce the documentation burden while maintaining quality records.
+
+## Key Features
+
+### Quick Recording
+Teachers should be able to record observations in 3 clicks or fewer:
+1. Select a student
+2. Select an observation category
+3. Select a specific observation template (or create a custom one)
+
+## User Roles
+
+### Teachers
+- Primary users who create and manage observations
+- Need quick access during busy classroom time
+
+## Workflow Example
+
+1. Teacher notices a student helping another with a math problem
+2. Teacher opens app and selects the student's profile
+3. Selects "Social Behavior" category
+4. Taps "Peer Support" template
+5. App generates: "Demonstrated positive peer support by helping a classmate understand division problems"
+6. Teacher can edit or confirm with a single tap
+
+7. Record is saved with timestamp and automatically categorized
