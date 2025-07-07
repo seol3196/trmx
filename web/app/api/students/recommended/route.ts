@@ -10,31 +10,35 @@ const createServerClient = () => {
   return createClient(supabaseUrl, supabaseServiceKey);
 };
 
+// 학생 관찰 정보 타입 정의
+interface StudentObservation {
+  id: string;
+  name: string;
+  student_number?: number;
+  observationCount: number;
+  record_count?: number;  // RecommendedStudents 컴포넌트 호환용
+  lastObservation: string | null;
+}
+
 // 학생 데이터 타입
 interface Student {
   id: string;
   name: string;
+  class_id: string;
   student_number?: number;
-}
-
-// 학생 관찰 정보 타입 정의
-interface RecommendedStudent {
-  id: string;
-  name: string;
-  student_number: number;
-  record_count: number;
 }
 
 // 노트 데이터 타입
 interface Note {
   student_id: string;
   id: string;
+  created_at: string;
 }
 
 // 캐시 타입
 interface Cache {
   date: string;
-  data: RecommendedStudent[];
+  data: StudentObservation[];
 }
 
 // 캐시 저장소
@@ -60,7 +64,7 @@ export async function GET() {
       // 1. 모든 학생 정보 가져오기
       const { data: students, error: studentsError } = await supabase
         .from('students')
-        .select('id, name, student_number');
+        .select('id, name, class_id, student_number');
       
       if (studentsError) throw studentsError;
       if (!students || students.length === 0) {
@@ -70,35 +74,48 @@ export async function GET() {
       // 2. 최근 2주간 각 학생별 관찰 기록 수 가져오기
       const { data: notes, error: notesError } = await supabase
         .from('notes')
-        .select('student_id, id')
+        .select('student_id, id, created_at')
         .gte('created_at', twoWeeksAgo.toISOString());
       
       if (notesError) throw notesError;
       
       // 3. 학생별 관찰 기록 수 계산
-      const recommendedStudents: RecommendedStudent[] = (students as Student[]).map(student => {
+      const studentObservationCounts: StudentObservation[] = (students as Student[]).map(student => {
         // 해당 학생의 관찰 기록 수 계산
-        const recordCount = notes ? (notes as Note[]).filter(note => note.student_id === student.id).length : 0;
+        const studentNotes = notes ? (notes as Note[]).filter(note => note.student_id === student.id) : [];
+        const observationCount = studentNotes.length;
+        
+        // 가장 최근 관찰 기록 날짜 찾기
+        let lastObservation = null;
+        if (studentNotes.length > 0) {
+          // 최신 날짜 찾기
+          const latestNote = studentNotes.reduce((latest, current) => {
+            return new Date(latest.created_at) > new Date(current.created_at) ? latest : current;
+          });
+          lastObservation = latestNote.created_at;
+        }
         
         return {
           id: student.id,
           name: student.name,
-          student_number: student.student_number || 0,
-          record_count: recordCount
+          student_number: student.student_number,
+          observationCount,
+          record_count: observationCount, // RecommendedStudents 컴포넌트 호환용 필드 추가
+          lastObservation
         };
       });
       
       // 4. 관찰 기록 수가 적은 순으로 정렬
-      let sortedStudents = [...recommendedStudents].sort((a, b) => a.record_count - b.record_count);
+      let sortedStudents = [...studentObservationCounts].sort((a, b) => a.observationCount - b.observationCount);
       
       // 5. 관찰 기록 수가 같은 학생들은 무작위로 섞기
       // 관찰 기록 수가 같은 학생들을 그룹화
-      const groupedByCount: Record<number, RecommendedStudent[]> = {};
+      const groupedByCount: Record<number, StudentObservation[]> = {};
       sortedStudents.forEach(student => {
-        if (!groupedByCount[student.record_count]) {
-          groupedByCount[student.record_count] = [];
+        if (!groupedByCount[student.observationCount]) {
+          groupedByCount[student.observationCount] = [];
         }
-        groupedByCount[student.record_count].push(student);
+        groupedByCount[student.observationCount].push(student);
       });
       
       // 각 그룹 내에서 무작위로 섞기
@@ -109,49 +126,59 @@ export async function GET() {
       });
       
       // 6. 상위 5명만 반환
-      const finalRecommendedStudents = sortedStudents.slice(0, 5);
+      const recommendedStudents = sortedStudents.slice(0, 5);
       
       // 캐시 업데이트
       recommendationCache = {
         date: today,
-        data: finalRecommendedStudents
+        data: recommendedStudents
       };
       
-      return NextResponse.json(finalRecommendedStudents, { status: 200 });
+      return NextResponse.json(recommendedStudents, { status: 200 });
     } catch (supabaseError) {
       console.error('Supabase 연결 오류:', supabaseError);
       
       // Supabase 연결 실패 시 하드코딩된 데이터 반환
-      const hardcodedData: RecommendedStudent[] = [
+      const hardcodedData: StudentObservation[] = [
         { 
           id: '1', 
           name: '1번 학생', 
           student_number: 1,
-          record_count: 1
+          observationCount: 1,
+          record_count: 1,
+          lastObservation: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
         },
         { 
           id: '2', 
           name: '2번 학생', 
           student_number: 2,
-          record_count: 2
+          observationCount: 2,
+          record_count: 2,
+          lastObservation: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString()
         },
         { 
           id: '3', 
           name: '3번 학생', 
           student_number: 3,
-          record_count: 3
+          observationCount: 3,
+          record_count: 3,
+          lastObservation: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString()
         },
         { 
           id: '4', 
           name: '4번 학생', 
           student_number: 4,
-          record_count: 4
+          observationCount: 4,
+          record_count: 4,
+          lastObservation: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString()
         },
         { 
           id: '5', 
           name: '5번 학생', 
           student_number: 5,
-          record_count: 0
+          observationCount: 0,
+          record_count: 0,
+          lastObservation: null
         }
       ];
       
@@ -165,7 +192,7 @@ export async function GET() {
     }
   } catch (error) {
     console.error('추천 학생 조회 중 오류:', error);
-    // 오류 발생 시 오류 상태 반환
+    // 오류 발생 시 빈 배열 반환 대신 오류 상태 반환
     return NextResponse.json({ error: '추천 학생 조회 중 오류가 발생했습니다.' }, { status: 500 });
   }
 }

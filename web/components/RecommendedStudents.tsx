@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 // 추천 학생 타입 정의
 interface RecommendedStudent {
@@ -15,6 +16,8 @@ export default function RecommendedStudents() {
   const [students, setStudents] = useState<RecommendedStudent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [hoveredStudentId, setHoveredStudentId] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchRecommendedStudents = async () => {
@@ -60,6 +63,11 @@ export default function RecommendedStudents() {
     
     return () => clearTimeout(midnightTimeout);
   }, []);
+
+  // 학생 이름 클릭 시 기록 조회 페이지로 이동
+  const handleStudentClick = (studentId: string, studentName: string) => {
+    router.push(`/dashboard/records?studentId=${studentId}&studentName=${encodeURIComponent(studentName)}`);
+  };
 
   if (isLoading) {
     return (
@@ -190,7 +198,32 @@ export default function RecommendedStudents() {
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
                     <td style={{ ...tdStyle, width: '4rem', paddingLeft: '1rem' }}>{student.student_number}번</td>
-                    <td style={{ ...tdStyle, fontSize: '1rem', fontWeight: 500, color: '#111827' }}>{student.name}</td>
+                    <td 
+                      style={{ 
+                        ...tdStyle, 
+                        fontSize: '1rem', 
+                        fontWeight: 500, 
+                        color: hoveredStudentId === student.id ? '#4f46e5' : '#111827',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        textDecoration: hoveredStudentId === student.id ? 'underline' : 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.25rem'
+                      }}
+                      onClick={() => handleStudentClick(student.id, student.name)}
+                      onMouseEnter={() => setHoveredStudentId(student.id)}
+                      onMouseLeave={() => setHoveredStudentId(null)}
+                    >
+                      {student.name}
+                      {hoveredStudentId === student.id && (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                          <polyline points="15 3 21 3 21 9"></polyline>
+                          <line x1="10" y1="14" x2="21" y2="3"></line>
+                        </svg>
+                      )}
+                    </td>
                     <td style={{ ...tdStyle, textAlign: 'right', width: '6rem', paddingRight: '1rem', color: '#6b7280' }}>
                       {student.record_count === 0 
                         ? '기록 없음' 

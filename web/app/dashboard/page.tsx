@@ -48,27 +48,29 @@ export default function Dashboard() {
       }
     }
     
-    // 추천 학생 데이터 로드 (예시 데이터)
-    // 실제로는 API에서 가져오거나 다른 방식으로 데이터를 로드할 수 있습니다
-    setRecommendedStudents([
-      { 
-        id: '1', 
-        name: '김학생', 
-        lastObservation: new Date(2023, 5, 15), 
-        observationCount: 5 
-      },
-      { 
-        id: '2', 
-        name: '이학생', 
-        lastObservation: new Date(2023, 5, 10), 
-        observationCount: 3 
-      },
-      { 
-        id: '3', 
-        name: '박학생', 
-        observationCount: 0 
+    // 추천 학생 데이터를 API에서 가져옵니다
+    const fetchRecommendedStudents = async () => {
+      try {
+        const response = await fetch('/api/students/recommended');
+        if (response.ok) {
+          const data = await response.json();
+          // 날짜 문자열을 Date 객체로 변환
+          const studentsWithDates = data.map((student: any) => ({
+            ...student,
+            lastObservation: student.lastObservation ? new Date(student.lastObservation) : undefined
+          }));
+          setRecommendedStudents(studentsWithDates);
+        } else {
+          console.error('추천 학생 데이터를 가져오는데 실패했습니다.');
+          setRecommendedStudents([]);
+        }
+      } catch (error) {
+        console.error('추천 학생 데이터 로드 중 오류:', error);
+        setRecommendedStudents([]);
       }
-    ]);
+    };
+
+    fetchRecommendedStudents();
   }, []);
 
   // 노트 저장
