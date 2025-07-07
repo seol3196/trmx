@@ -173,7 +173,7 @@ export default function CardsPage() {
         const newRecord = {
           id: '',
           studentId: student.id,
-          cardId: '',
+          cardId: null,
           subject: selectedSubject,
           memo: memo,
           recordedDate: new Date()
@@ -221,8 +221,13 @@ export default function CardsPage() {
   // 과목별 카드 필터링
   const filteredCards = cards.filter(card => card.subject === selectedSubject);
   
-  // 과목 목록 생성
+  // 과목 목록 생성 및 정렬 - "생활" 과목을 제일 앞으로 정렬
   const subjects = Array.from(new Set(cards.map(card => card.subject)));
+  const sortedSubjects = [...subjects].sort((a, b) => {
+    if (a === '생활') return -1;
+    if (b === '생활') return 1;
+    return a.localeCompare(b);
+  });
 
   // 선택된 학생 수 표시 텍스트
   const selectedStudentsText = selectedStudents.length > 0 
@@ -316,34 +321,48 @@ export default function CardsPage() {
             <div style={{ marginBottom: '2rem' }}>
               <h2 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '0.75rem' }}>과목 선택</h2>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                {subjects.map(subject => (
-                  <button
-                    key={subject}
-                    style={{
-                      width: 'auto',
-                      minWidth: '6rem',
-                      height: '3.5rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      borderRadius: '0.5rem',
-                      fontWeight: '500',
-                      transition: 'all 0.2s',
-                      fontSize: '1rem',
-                      padding: '0 1rem',
-                      margin: '0 0.5rem 0.5rem 0',
-                      backgroundColor: selectedSubject === subject ? '#3b82f6' : 'white',
-                      color: selectedSubject === subject ? 'white' : '#374151',
-                      border: selectedSubject === subject ? 'none' : '1px solid #e5e7eb',
-                      boxShadow: selectedSubject === subject ? '0 4px 6px -1px rgba(0, 0, 0, 0.1)' : 'none',
-                      transform: selectedSubject === subject ? 'scale(1.05)' : 'scale(1)',
-                      cursor: 'pointer'
-                    }}
-                    onClick={() => setSelectedSubject(subject)}
-                  >
-                    {subject}
-                  </button>
-                ))}
+                {sortedSubjects.map(subject => {
+                  // 생활 과목일 경우 다른 스타일 적용
+                  const isLifeSubject = subject === '생활';
+                  const backgroundColor = selectedSubject === subject 
+                    ? (isLifeSubject ? '#15803d' : '#3b82f6') 
+                    : 'white';
+                  const textColor = selectedSubject === subject 
+                    ? (isLifeSubject ? '#facc15' : 'white') 
+                    : '#374151';
+                  const borderColor = isLifeSubject 
+                    ? '#166534' 
+                    : (selectedSubject === subject ? 'none' : '#e5e7eb');
+                  
+                  return (
+                    <button
+                      key={subject}
+                      style={{
+                        width: 'auto',
+                        minWidth: '6rem',
+                        height: '3.5rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: '0.5rem',
+                        fontWeight: '500',
+                        transition: 'all 0.2s',
+                        fontSize: '1rem',
+                        padding: '0 1rem',
+                        margin: '0 0.5rem 0.5rem 0',
+                        backgroundColor: backgroundColor,
+                        color: textColor,
+                        border: selectedSubject === subject ? 'none' : `1px solid ${borderColor}`,
+                        boxShadow: selectedSubject === subject ? '0 4px 6px -1px rgba(0, 0, 0, 0.1)' : 'none',
+                        transform: selectedSubject === subject ? 'scale(1.05)' : 'scale(1)',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => setSelectedSubject(subject)}
+                    >
+                      {subject}
+                    </button>
+                  );
+                })}
               </div>
             </div>
             

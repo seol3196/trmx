@@ -293,25 +293,25 @@ export default function RecordsPage() {
               <table className="w-full table-auto">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-base font-medium text-gray-700 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-center text-base font-medium text-gray-700 uppercase tracking-wider">
                       날짜
                     </th>
-                    <th className="px-6 py-3 text-left text-base font-medium text-gray-700 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-center text-base font-medium text-gray-700 uppercase tracking-wider">
                       학생
                     </th>
-                    <th className="px-6 py-3 text-left text-base font-medium text-gray-700 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-center text-base font-medium text-gray-700 uppercase tracking-wider">
                       과목
                     </th>
-                    <th className="px-6 py-3 text-left text-base font-medium text-gray-700 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-center text-base font-medium text-gray-700 uppercase tracking-wider">
                       카드
                     </th>
-                    <th className="px-6 py-3 text-left text-base font-medium text-gray-700 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-center text-base font-medium text-gray-700 uppercase tracking-wider">
                       메모
                     </th>
-                    <th className="px-6 py-3 text-left text-base font-medium text-gray-700 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-center text-base font-medium text-gray-700 uppercase tracking-wider">
                       동기화
                     </th>
-                    <th className="px-6 py-3 text-left text-base font-medium text-gray-700 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-center text-base font-medium text-gray-700 uppercase tracking-wider">
                       작업
                     </th>
                   </tr>
@@ -320,20 +320,20 @@ export default function RecordsPage() {
                   {filteredRecords.length > 0 ? (
                     filteredRecords.map(record => (
                       <tr key={record.id}>
-                        <td className="px-6 py-4 whitespace-nowrap text-base">
+                        <td className="px-6 py-4 whitespace-nowrap text-base text-center">
                           {format(new Date(record.recordedDate), 'yyyy-MM-dd')}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-base">
+                        <td className="px-6 py-4 whitespace-nowrap text-base text-center">
                           {record.student 
                             ? `${record.student.student_number}. ${record.student.name}` 
                             : '알 수 없음'}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-base">
+                        <td className="px-6 py-4 whitespace-nowrap text-base text-center">
                           {record.subject}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-base">
+                        <td className="px-6 py-4 whitespace-nowrap text-base text-center">
                           {record.card ? (
-                            <div className="flex items-center">
+                            <div className="flex items-center justify-center">
                               <span className="mr-1 text-xl">{record.card.icon}</span>
                               <span>{record.card.title}</span>
                             </div>
@@ -341,23 +341,25 @@ export default function RecordsPage() {
                             <span className="text-gray-500">-</span>
                           )}
                         </td>
-                        <td className="px-6 py-4 text-base">
+                        <td className="px-6 py-4 text-base text-center">
                           {record.memo}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-base">
+                        <td className="px-6 py-4 whitespace-nowrap text-base text-center">
                           {record.serverSynced ? (
-                            <span className="text-green-500 font-medium">완료</span>
+                            <span className="text-green-500 font-medium flex justify-center items-center">완료</span>
                           ) : (
-                            <span className="text-amber-500 font-medium">대기 중</span>
+                            <span className="text-amber-500 font-medium flex justify-center items-center">대기 중</span>
                           )}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-base">
-                          <button
-                            className="text-red-600 hover:text-red-900 font-medium"
-                            onClick={() => handleDeleteRecord(record.id)}
-                          >
-                            삭제
-                          </button>
+                        <td className="px-6 py-4 whitespace-nowrap text-base text-center">
+                          <div className="flex justify-center items-center">
+                            <button
+                              className="text-red-600 hover:text-red-900 font-medium"
+                              onClick={() => handleDeleteRecord(record.id)}
+                            >
+                              삭제
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))
