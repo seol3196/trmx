@@ -46,6 +46,24 @@ export default function RecordsPage() {
   );
   const [searchQuery, setSearchQuery] = useState<string>('');
 
+  // URL 파라미터 처리
+  useEffect(() => {
+    // URL에서 파라미터 가져오기
+    const url = new URL(window.location.href);
+    const studentId = url.searchParams.get('studentId');
+    const studentName = url.searchParams.get('studentName');
+
+    // 학생 ID가 URL에 있으면 필터 설정
+    if (studentId) {
+      setSelectedStudent(studentId);
+    }
+    
+    // 학생 이름이 URL에 있으면 검색어로 설정
+    if (studentName) {
+      setSearchQuery(decodeURIComponent(studentName));
+    }
+  }, []);
+
   // 데이터 로드
   useEffect(() => {
     const loadData = async () => {

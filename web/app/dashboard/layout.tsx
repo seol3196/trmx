@@ -20,25 +20,25 @@ export default function DashboardLayout({
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* 상단 네비게이션 바 */}
-      <nav className="bg-white shadow-md">
-        <div className="container mx-auto px-4">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center">
-              <h1 className="text-xl font-bold text-blue-600">ClickNote</h1>
+      <nav style={{ backgroundColor: 'white', boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)' }}>
+        <div style={{ width: '100%', padding: '0 1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', height: '4rem', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <h1 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#2563eb' }}>ClickNote</h1>
             </div>
-            <div className="flex items-center space-x-4">
-              <Link href="/dashboard" className="text-gray-600 hover:text-blue-600">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <Link href="/dashboard" style={{ color: '#4b5563', textDecoration: 'none' }}>
                 대시보드
               </Link>
-              <Link href="/dashboard/cards" className="text-gray-600 hover:text-blue-600">
+              <Link href="/dashboard/cards" style={{ color: '#4b5563', textDecoration: 'none' }}>
                 카드 기록
               </Link>
-              <Link href="/dashboard/records" className="text-gray-600 hover:text-blue-600">
+              <Link href="/dashboard/records" style={{ color: '#4b5563', textDecoration: 'none' }}>
                 기록 조회
               </Link>
-              <Link href="/dashboard/card-management" className="text-gray-600 hover:text-blue-600">
+              <Link href="/dashboard/card-management" style={{ color: '#4b5563', textDecoration: 'none' }}>
                 카드 관리
               </Link>
             </div>
@@ -47,20 +47,20 @@ export default function DashboardLayout({
       </nav>
       
       {/* 동기화 상태 표시줄 */}
-      <div className="bg-gray-50 border-b">
-        <div className="container mx-auto px-4 py-2 flex justify-end">
+      <div style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
+        <div style={{ width: '100%', padding: '0.5rem 1.5rem', display: 'flex', justifyContent: 'flex-end' }}>
           <SyncStatus />
         </div>
       </div>
       
       {/* 메인 콘텐츠 */}
-      <main className="flex-grow bg-gray-50">
+      <main style={{ flexGrow: 1, backgroundColor: '#f9fafb' }}>
         {children}
       </main>
       
       {/* 푸터 */}
-      <footer className="bg-white border-t py-4">
-        <div className="container mx-auto px-4 text-center text-gray-500 text-sm">
+      <footer style={{ backgroundColor: 'white', borderTop: '1px solid #e5e7eb', padding: '1rem 0' }}>
+        <div style={{ width: '100%', padding: '0 1.5rem', textAlign: 'center', color: '#6b7280', fontSize: '0.875rem' }}>
           &copy; {new Date().getFullYear()} ClickNote - 교사를 위한 학생 기록 도구
         </div>
       </footer>
