@@ -41,9 +41,7 @@ export default function RecordsPage() {
   // 필터 상태
   const [selectedStudent, setSelectedStudent] = useState<string>('all');
   const [selectedSubject, setSelectedSubject] = useState<string>('all');
-  const [selectedDate, setSelectedDate] = useState<string>(
-    format(new Date(), 'yyyy-MM-dd')
-  );
+  const [selectedDate, setSelectedDate] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   // URL 파라미터 처리
@@ -174,10 +172,12 @@ export default function RecordsPage() {
       return false;
     }
     
-    // 날짜 필터
-    const recordDate = format(new Date(record.recordedDate), 'yyyy-MM-dd');
-    if (selectedDate && recordDate !== selectedDate) {
-      return false;
+    // 날짜 필터 (날짜가 선택된 경우에만 필터링)
+    if (selectedDate) {
+      const recordDate = format(new Date(record.recordedDate), 'yyyy-MM-dd');
+      if (recordDate !== selectedDate) {
+        return false;
+      }
     }
     
     // 검색어 필터
@@ -280,7 +280,16 @@ export default function RecordsPage() {
                   }}
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
+                  placeholder="날짜 선택 (선택사항)"
                 />
+                {selectedDate && (
+                  <button
+                    onClick={() => setSelectedDate('')}
+                    className="mt-2 text-sm text-blue-600 hover:text-blue-800"
+                  >
+                    날짜 필터 해제
+                  </button>
+                )}
               </div>
               
               {/* 검색어 */}
