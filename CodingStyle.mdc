@@ -1,0 +1,90 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Coding Style Guidelines
+
+## TypeScript
+- Always use TypeScript for new files
+- Use explicit type annotations for function parameters and return types
+- Use interfaces for objects that will be extended, types for simple definitions
+- Avoid `any` type, prefer `unknown` when type is uncertain
+- Use type guards to narrow down types when necessary
+
+## React Patterns
+- Use functional components with hooks
+- Use named exports for components
+- Keep components small and focused on a single responsibility
+- Extract complex logic to custom hooks
+- Use the React Context API for state that needs to be accessed by many components
+
+## State Management
+- Use React's `useState` for simple local state
+- Use React's `useReducer` for more complex state logic
+- Store user authentication state in Auth Provider
+- For shared state, consider using React Context API
+
+## CSS/Styling
+- Use Tailwind CSS for styling with caution
+- When using Tailwind classes, check if they're working as expected
+- For critical layout elements, use inline styles as a fallback
+- Follow mobile-first approach for responsive design
+- Use semantic color names in class naming
+- Group related styles together
+
+### CSS Implementation Guide
+- **Tailwind CSS Setup**: 
+  - Make sure `globals.css` has the required directives at the top:
+    ```css
+    @tailwind base;
+    @tailwind components;
+    @tailwind utilities;
+    ```
+  - Use Tailwind v3.x (not experimental v4.x)
+  - Ensure `postcss.config.js` includes both `tailwindcss` and `autoprefixer`
+
+- **Styling Approach**:
+  - First attempt: Use Tailwind utility classes
+  - If Tailwind classes don't work: Use inline styles for critical layout
+  - For complex components: Consider creating custom CSS classes
+
+- **Table Layouts**:
+  - Use inline styles for column widths: `style={{ width: '9rem' }}`
+  - Use Tailwind for general styling (padding, colors, etc.)
+  - For text overflow: Use `className="truncate"` with a max-width
+
+- **Responsive Design**:
+  - Use Tailwind's responsive prefixes when possible: `md:w-64`
+  - Fallback to media queries in `globals.css` if needed
+
+## Error Handling
+- Use try-catch blocks for async operations
+- Display user-friendly error messages
+- Log detailed error information for debugging
+- Handle edge cases explicitly
+
+## Testing
+- Write unit tests for utility functions
+- Write component tests for complex components
+- Use Jest for testing
+- Follow AAA pattern (Arrange, Act, Assert)
+
+## Performance
+- Use React.memo for preventing unnecessary re-renders
+- Memoize expensive calculations with useMemo
+- Memoize callbacks with useCallback when passed to child components
+- Virtualize long lists with react-window or similar libraries
+
+## Accessibility
+- Use semantic HTML elements
+- Include proper ARIA attributes
+- Ensure keyboard navigation works properly
+- Maintain sufficient color contrast
+
+## Commenting
+- Add comments for complex logic
+- Document functions with JSDoc
+- Keep comments updated with code changes
+- Avoid commenting obvious code
+

@@ -40,11 +40,29 @@ async function getValidUserId() {
 }
 
 // GET 요청 처리 - 학생 목록 가져오기
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const supabase = createServerClient();
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
     
-    // 학생 데이터 가져오기
+    // 특정 학생 ID로 필터링
+    if (id) {
+      const { data: student, error } = await supabase
+        .from('students')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (error) {
+        console.error('학생 데이터 로드 오류:', error);
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+      
+      return NextResponse.json(student);
+    }
+    
+    // 모든 학생 데이터 가져오기
     const { data: students, error } = await supabase
       .from('students')
       .select('*')

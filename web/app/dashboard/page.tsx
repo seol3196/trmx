@@ -19,6 +19,7 @@ interface Student {
   name: string;
   lastObservation?: Date;
   observationCount: number;
+  record_count?: number;
 }
 
 export default function Dashboard() {
@@ -222,7 +223,7 @@ export default function Dashboard() {
                               {student.lastObservation ? formatDate(student.lastObservation) : '관찰 기록 없음'}
                             </p>
                             <div className="text-xs py-0.5 px-2 bg-indigo-50 text-indigo-600 rounded-full font-medium">
-                              {student.observationCount}회 관찰
+                              {student.observationCount || student.record_count || 0}회 관찰
                             </div>
                           </div>
                         </div>

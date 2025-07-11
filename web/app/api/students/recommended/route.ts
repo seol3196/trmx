@@ -35,6 +35,13 @@ interface Note {
   created_at: string;
 }
 
+// 카드 기록 데이터 타입
+interface CardRecord {
+  student_id: string;
+  id: string;
+  recorded_date: string;
+}
+
 // 캐시 타입
 interface Cache {
   date: string;
@@ -71,28 +78,51 @@ export async function GET() {
         throw new Error('학생 데이터가 없습니다');
       }
       
-      // 2. 최근 2주간 각 학생별 관찰 기록 수 가져오기
+      // 2. 최근 2주간 각 학생별 노트 기록 수 가져오기
       const { data: notes, error: notesError } = await supabase
         .from('notes')
         .select('student_id, id, created_at')
         .gte('created_at', twoWeeksAgo.toISOString());
       
       if (notesError) throw notesError;
+
+      // 3. 최근 2주간 각 학생별 카드 기록 수 가져오기
+      const { data: cardRecords, error: cardRecordsError } = await supabase
+        .from('card_records')
+        .select('student_id, id, recorded_date')
+        .gte('recorded_date', twoWeeksAgo.toISOString());
       
-      // 3. 학생별 관찰 기록 수 계산
+      if (cardRecordsError) throw cardRecordsError;
+      
+      // 4. 학생별 관찰 기록 수 계산 (노트 + 카드 기록)
       const studentObservationCounts: StudentObservation[] = (students as Student[]).map(student => {
-        // 해당 학생의 관찰 기록 수 계산
+        // 해당 학생의 노트 기록 필터링
         const studentNotes = notes ? (notes as Note[]).filter(note => note.student_id === student.id) : [];
-        const observationCount = studentNotes.length;
+        
+        // 해당 학생의 카드 기록 필터링
+        const studentCardRecords = cardRecords ? (cardRecords as CardRecord[]).filter(record => record.student_id === student.id) : [];
+        
+        // 모든 관찰 기록 (노트 + 카드)
+        const allObservations = [
+          ...studentNotes.map(note => ({
+            date: new Date(note.created_at),
+            type: 'note'
+          })),
+          ...studentCardRecords.map(record => ({
+            date: new Date(record.recorded_date),
+            type: 'card'
+          }))
+        ];
+        
+        // 총 관찰 횟수
+        const observationCount = allObservations.length;
         
         // 가장 최근 관찰 기록 날짜 찾기
         let lastObservation = null;
-        if (studentNotes.length > 0) {
-          // 최신 날짜 찾기
-          const latestNote = studentNotes.reduce((latest, current) => {
-            return new Date(latest.created_at) > new Date(current.created_at) ? latest : current;
-          });
-          lastObservation = latestNote.created_at;
+        if (allObservations.length > 0) {
+          // 날짜 기준으로 내림차순 정렬
+          allObservations.sort((a, b) => b.date.getTime() - a.date.getTime());
+          lastObservation = allObservations[0].date.toISOString();
         }
         
         return {
@@ -105,10 +135,10 @@ export async function GET() {
         };
       });
       
-      // 4. 관찰 기록 수가 적은 순으로 정렬
+      // 5. 관찰 기록 수가 적은 순으로 정렬
       let sortedStudents = [...studentObservationCounts].sort((a, b) => a.observationCount - b.observationCount);
       
-      // 5. 관찰 기록 수가 같은 학생들은 무작위로 섞기
+      // 6. 관찰 기록 수가 같은 학생들은 무작위로 섞기
       // 관찰 기록 수가 같은 학생들을 그룹화
       const groupedByCount: Record<number, StudentObservation[]> = {};
       sortedStudents.forEach(student => {
@@ -125,7 +155,7 @@ export async function GET() {
         sortedStudents = [...sortedStudents, ...shuffleArray(groupedByCount[count])];
       });
       
-      // 6. 상위 5명만 반환
+      // 7. 상위 5명만 반환
       const recommendedStudents = sortedStudents.slice(0, 5);
       
       // 캐시 업데이트
@@ -146,7 +176,7 @@ export async function GET() {
           student_number: 1,
           observationCount: 1,
           record_count: 1,
-          lastObservation: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+          lastObservation: new Date().toISOString()
         },
         { 
           id: '2', 
@@ -154,7 +184,7 @@ export async function GET() {
           student_number: 2,
           observationCount: 2,
           record_count: 2,
-          lastObservation: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString()
+          lastObservation: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
         },
         { 
           id: '3', 
@@ -162,7 +192,7 @@ export async function GET() {
           student_number: 3,
           observationCount: 3,
           record_count: 3,
-          lastObservation: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString()
+          lastObservation: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
         },
         { 
           id: '4', 
@@ -170,7 +200,7 @@ export async function GET() {
           student_number: 4,
           observationCount: 4,
           record_count: 4,
-          lastObservation: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString()
+          lastObservation: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
         },
         { 
           id: '5', 
