@@ -320,25 +320,25 @@ export default function RecordsPage() {
               <table className="w-full table-auto">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th style={{ width: '9rem' }} className="px-6 py-3 text-center text-base font-medium text-gray-700 uppercase tracking-wider">
+                    <th style={{ width: '9rem' }} className="px-6 py-3 text-center text-base font-medium text-gray-700 uppercase tracking-wider whitespace-nowrap">
                       날짜
                     </th>
-                    <th style={{ width: '11rem' }} className="px-6 py-3 text-center text-base font-medium text-gray-700 uppercase tracking-wider">
+                    <th style={{ width: '11rem' }} className="px-6 py-3 text-center text-base font-medium text-gray-700 uppercase tracking-wider whitespace-nowrap">
                       학생
                     </th>
-                    <th style={{ width: '9rem' }} className="px-6 py-3 text-center text-base font-medium text-gray-700 uppercase tracking-wider">
+                    <th style={{ width: '9rem' }} className="px-6 py-3 text-center text-base font-medium text-gray-700 uppercase tracking-wider whitespace-nowrap">
                       과목
                     </th>
-                    <th style={{ width: '11rem' }} className="px-6 py-3 text-center text-base font-medium text-gray-700 uppercase tracking-wider">
+                    <th style={{ width: '11rem' }} className="px-6 py-3 text-center text-base font-medium text-gray-700 uppercase tracking-wider whitespace-nowrap">
                       카드
                     </th>
                     <th style={{ maxWidth: '28rem', width: '40%' }} className="px-6 py-3 text-center text-base font-medium text-gray-700 uppercase tracking-wider">
                       메모
                     </th>
-                    <th style={{ width: '8rem' }} className="px-6 py-3 text-center text-base font-medium text-gray-700 uppercase tracking-wider">
+                    <th style={{ width: '8rem' }} className="px-6 py-3 text-center text-base font-medium text-gray-700 uppercase tracking-wider whitespace-nowrap">
                       동기화
                     </th>
-                    <th style={{ width: '7rem' }} className="px-6 py-3 text-center text-base font-medium text-gray-700 uppercase tracking-wider">
+                    <th style={{ width: '7rem' }} className="px-6 py-3 text-center text-base font-medium text-gray-700 uppercase tracking-wider whitespace-nowrap">
                       작업
                     </th>
                   </tr>
