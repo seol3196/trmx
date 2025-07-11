@@ -189,36 +189,28 @@ export default function CardManagementPage() {
     : cards.filter(card => card.subject === selectedSubject);
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb', padding: '1.5rem 0' }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1rem' }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1.5rem', color: '#1f2937' }}>카드 관리</h1>
+    <div className="min-h-screen bg-gray-50 py-6">
+      <div className="max-w-6xl mx-auto px-4">
+        <h1 className="text-2xl font-bold mb-6 text-gray-800">카드 관리</h1>
         
         {isLoading ? (
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '16rem', backgroundColor: 'white', borderRadius: '0.75rem', boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)', padding: '1.5rem' }}>
-            <div style={{ height: '4rem', width: '4rem', borderRadius: '50%', border: '4px solid #e5e7eb', borderTopColor: '#3b82f6', animation: 'spin 1s linear infinite' }}></div>
-            <p style={{ marginTop: '1rem', color: '#4b5563' }}>데이터를 불러오는 중입니다...</p>
+          <div className="flex flex-col justify-center items-center h-64 bg-white rounded-xl shadow-sm p-6">
+            <div className="h-16 w-16 rounded-full border-4 border-gray-200 border-t-blue-500 animate-spin"></div>
+            <p className="mt-4 text-gray-600">데이터를 불러오는 중입니다...</p>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' }}>
+          <div className="grid grid-cols-1 gap-6">
             {/* 카드 생성/편집 폼 */}
-            <div style={{ backgroundColor: 'white', borderRadius: '0.75rem', boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)', padding: '1.5rem' }}>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1rem' }}>{isEditing ? '카드 편집' : '새 카드 생성'}</h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
+            <div className="bg-white rounded-xl shadow-sm p-6">
+              <h2 className="text-xl font-semibold mb-4">{isEditing ? '카드 편집' : '새 카드 생성'}</h2>
+              <div className="flex flex-col gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   {/* 제목 */}
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.25rem' }}>제목</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">제목</label>
                     <input
                       type="text"
-                      style={{ 
-                        width: '100%', 
-                        padding: '0.75rem', 
-                        border: '1px solid #d1d5db', 
-                        borderRadius: '0.5rem', 
-                        outline: 'none',
-                        transition: 'all 0.2s',
-                        boxSizing: 'border-box'
-                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
                       placeholder="카드 제목"
                       value={currentCard.title}
                       onChange={(e) => setCurrentCard({ ...currentCard, title: e.target.value })}
@@ -227,64 +219,41 @@ export default function CardManagementPage() {
                   
                   {/* 색상 선택 */}
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.25rem' }}>색상</label>
-                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">색상</label>
+                    <div className="flex gap-2 flex-wrap">
                       {availableColors.map(color => (
                         <button
                           key={color}
-                          style={{ 
-                            width: '2.5rem', 
-                            height: '2.5rem', 
-                            borderRadius: '50%', 
-                            backgroundColor: color, 
-                            border: '2px solid #d1d5db',
-                            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                            outline: currentCard.color === color ? '2px solid #6b7280' : 'none',
-                            outlineOffset: currentCard.color === color ? '2px' : '0',
-                            cursor: 'pointer',
-                            margin: '0.25rem'
-                          }}
+                          className={`w-10 h-10 rounded-full border-2 shadow-sm cursor-pointer m-1 ${currentCard.color === color ? 'ring-2 ring-gray-500 ring-offset-2' : 'border-gray-300'}`}
+                          style={{ backgroundColor: color }}
                           onClick={() => setCurrentCard({ ...currentCard, color })}
                         ></button>
                       ))}
                     </div>
                   </div>
-                </div>
-                
-                {/* 설명 */}
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.25rem' }}>설명</label>
-                  <textarea
-                    style={{ 
-                      width: '100%', 
-                      padding: '0.75rem', 
-                      border: '1px solid #d1d5db', 
-                      borderRadius: '0.5rem', 
-                      outline: 'none',
-                      transition: 'all 0.2s',
-                      boxSizing: 'border-box'
-                    }}
-                    placeholder="카드 설명"
-                    rows={3}
-                    value={currentCard.description}
-                    onChange={(e) => setCurrentCard({ ...currentCard, description: e.target.value })}
-                  ></textarea>
-                </div>
-                
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
-                  {/* 과목 */}
+                  
+                  {/* 아이콘 선택 */}
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.25rem' }}>과목</label>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">아이콘</label>
+                    <div className="flex gap-2 flex-wrap">
+                      {availableIcons.map(icon => (
+                        <button
+                          key={icon}
+                          className={`w-10 h-10 flex items-center justify-center rounded-lg border text-xl cursor-pointer ${currentCard.icon === icon ? 'bg-indigo-100 border-indigo-300' : 'bg-white border-gray-300 hover:bg-gray-50'}`}
+                          onClick={() => setCurrentCard({ ...currentCard, icon })}
+                        >
+                          {icon}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* 과목 선택 */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">과목</label>
+                    <div className="flex items-center gap-2">
                       <select
-                        style={{ 
-                          flex: '1', 
-                          padding: '0.75rem', 
-                          border: '1px solid #d1d5db', 
-                          borderRadius: '0.5rem', 
-                          outline: 'none',
-                          transition: 'all 0.2s'
-                        }}
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
                         value={currentCard.subject}
                         onChange={(e) => setCurrentCard({ ...currentCard, subject: e.target.value })}
                       >
@@ -293,196 +262,105 @@ export default function CardManagementPage() {
                         ))}
                       </select>
                       <button
-                        style={{
-                          padding: '12px 16px',
-                          backgroundColor: '#e5e7eb',
-                          color: '#374151',
-                          borderRadius: '8px',
-                          border: 'none',
-                          cursor: 'pointer',
-                          minWidth: '48px',
-                          minHeight: '48px',
-                          transition: 'all 0.2s'
-                        }}
-                        onMouseOver={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#d1d5db'}
-                        onMouseOut={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#e5e7eb'}
+                        className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg border border-gray-300 hover:bg-gray-200 transition-colors"
                         onClick={handleAddSubject}
                       >
-                        +
+                        과목 추가
                       </button>
                     </div>
                   </div>
-                </div>
-                
-                {/* 아이콘 선택 */}
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.25rem' }}>아이콘</label>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(10, 1fr)', gap: '0.5rem' }}>
-                    {availableIcons.map(icon => (
-                      <button
-                        key={icon}
-                        style={{ 
-                          padding: '0.5rem', 
-                          fontSize: '1.5rem', 
-                          borderRadius: '0.5rem', 
-                          backgroundColor: currentCard.icon === icon ? '#dbeafe' : '#f9fafb',
-                          border: currentCard.icon === icon ? '2px solid #3b82f6' : '1px solid #e5e7eb',
-                          cursor: 'pointer'
-                        }}
-                        onClick={() => setCurrentCard({ ...currentCard, icon })}
-                      >
-                        {icon}
-                      </button>
-                    ))}
+                  
+                  {/* 설명 */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">설명</label>
+                    <textarea
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                      placeholder="카드 설명"
+                      rows={3}
+                      value={currentCard.description}
+                      onChange={(e) => setCurrentCard({ ...currentCard, description: e.target.value })}
+                    ></textarea>
                   </div>
                 </div>
                 
                 {/* 버튼 그룹 */}
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', paddingTop: '1rem' }}>
+                <div className="flex justify-end gap-3 mt-2">
                   <button
-                    style={{ 
-                      padding: '0.5rem 1rem', 
-                      backgroundColor: '#e5e7eb', 
-                      color: '#374151', 
-                      borderRadius: '0.5rem', 
-                      border: 'none',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s'
-                    }}
+                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg border border-gray-300 hover:bg-gray-200 transition-colors"
                     onClick={resetForm}
                   >
                     취소
                   </button>
                   <button
-                    style={{ 
-                      padding: '0.5rem 1rem', 
-                      backgroundColor: '#2563eb', 
-                      color: 'white', 
-                      borderRadius: '0.5rem', 
-                      border: 'none',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s'
-                    }}
+                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                     onClick={handleSaveCard}
                   >
-                    {isEditing ? '수정하기' : '생성하기'}
+                    {isEditing ? '수정' : '생성'}
                   </button>
                 </div>
               </div>
             </div>
             
             {/* 카드 목록 */}
-            <div style={{ backgroundColor: 'white', borderRadius: '0.75rem', boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)', padding: '1.5rem' }}>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1rem' }}>카드 목록</h2>
-              
-              {/* 과목 필터 */}
-              <div style={{ marginBottom: '1.5rem' }}>
-                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>과목별 필터링</label>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  <button
-                    style={{
-                      padding: '0.5rem 1rem',
-                      borderRadius: '0.5rem',
-                      fontWeight: '500',
-                      fontSize: '0.875rem',
-                      backgroundColor: selectedSubject === '전체' ? '#3b82f6' : '#f3f4f6',
-                      color: selectedSubject === '전체' ? 'white' : '#374151',
-                      border: 'none',
-                      cursor: 'pointer'
-                    }}
-                    onClick={() => setSelectedSubject('전체')}
+            <div className="bg-white rounded-xl shadow-sm p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">카드 목록</h2>
+                <div className="flex gap-2">
+                  <select
+                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                    value={selectedSubject}
+                    onChange={(e) => setSelectedSubject(e.target.value)}
                   >
-                    전체
-                  </button>
-                  {subjects.map(subject => (
-                    <button
-                      key={subject}
-                      style={{
-                        padding: '0.5rem 1rem',
-                        borderRadius: '0.5rem',
-                        fontWeight: '500',
-                        fontSize: '0.875rem',
-                        backgroundColor: selectedSubject === subject ? '#3b82f6' : '#f3f4f6',
-                        color: selectedSubject === subject ? 'white' : '#374151',
-                        border: 'none',
-                        cursor: 'pointer'
-                      }}
-                      onClick={() => setSelectedSubject(subject)}
-                    >
-                      {subject}
-                    </button>
-                  ))}
+                    <option value="전체">전체 과목</option>
+                    {subjects.map(subject => (
+                      <option key={subject} value={subject}>{subject}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
               
-              {cards.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '2.5rem 0', color: '#6b7280' }}>
-                  생성된 카드가 없습니다. 새 카드를 만들어보세요.
+              {filteredCards.length === 0 ? (
+                <div className="bg-gray-50 rounded-lg border border-dashed border-gray-300 p-8 text-center">
+                  <p className="text-gray-600 mb-2">카드가 없습니다.</p>
+                  <p className="text-sm text-gray-500">위 폼을 사용하여 새 카드를 생성하세요.</p>
                 </div>
               ) : (
-                <div style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', 
-                  gap: '1rem', 
-                  maxHeight: '600px', 
-                  overflowY: 'auto', 
-                  paddingRight: '0.5rem' 
-                }}>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {filteredCards.map(card => (
-                    <div 
-                      key={card.id} 
-                      style={{ 
-                        border: '1px solid #e5e7eb', 
-                        borderLeft: `6px solid ${card.color}`, 
-                        borderRadius: '0.5rem', 
-                        padding: '1rem', 
-                        transition: 'all 0.2s',
-                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                          <span style={{ fontSize: '1.875rem' }}>{card.icon}</span>
-                          <div>
-                            <h3 style={{ fontWeight: '600', fontSize: '1.125rem' }}>{card.title}</h3>
-                            <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>{card.subject}</p>
+                    <div key={card.id} className="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm">
+                      <div className="p-4">
+                        <div className="flex items-start">
+                          <div 
+                            className="w-10 h-10 rounded-lg flex items-center justify-center text-lg mr-3 flex-shrink-0"
+                            style={{ backgroundColor: card.color }}
+                          >
+                            {card.icon}
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-medium text-gray-900 mb-1">{card.title}</h3>
+                            <p className="text-sm text-gray-600 line-clamp-2 mb-2">{card.description}</p>
+                            <div className="flex items-center gap-2">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                {card.subject}
+                              </span>
+                            </div>
                           </div>
                         </div>
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                          <button
-                            style={{ 
-                              padding: '0.5rem', 
-                              color: '#2563eb', 
-                              borderRadius: '9999px', 
-                              border: 'none',
-                              backgroundColor: 'transparent',
-                              cursor: 'pointer'
-                            }}
-                            onClick={() => handleEditCard(card)}
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" style={{ height: '1.25rem', width: '1.25rem' }} viewBox="0 0 20 20" fill="currentColor">
-                              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                            </svg>
-                          </button>
-                          <button
-                            style={{ 
-                              padding: '0.5rem', 
-                              color: '#dc2626', 
-                              borderRadius: '9999px', 
-                              border: 'none',
-                              backgroundColor: 'transparent',
-                              cursor: 'pointer'
-                            }}
-                            onClick={() => handleDeleteCard(card.id)}
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" style={{ height: '1.25rem', width: '1.25rem' }} viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                            </svg>
-                          </button>
-                        </div>
                       </div>
-                      <p style={{ marginTop: '0.5rem', color: '#374151' }}>{card.description}</p>
+                      <div className="border-t border-gray-200 bg-gray-50 px-4 py-2 flex justify-end gap-2">
+                        <button
+                          className="px-3 py-1 text-sm bg-indigo-50 text-indigo-700 rounded hover:bg-indigo-100 transition-colors"
+                          onClick={() => handleEditCard(card)}
+                        >
+                          편집
+                        </button>
+                        <button
+                          className="px-3 py-1 text-sm bg-red-50 text-red-700 rounded hover:bg-red-100 transition-colors"
+                          onClick={() => handleDeleteCard(card.id)}
+                        >
+                          삭제
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>

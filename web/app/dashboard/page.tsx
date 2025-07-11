@@ -148,46 +148,13 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 메인 컨텐츠 */}
-      <div style={{
-        maxWidth: '1800px',
-        margin: '0 auto',
-        padding: '2rem',
-        overflowX: 'auto'
-      }}>
+      <div className="max-w-7xl mx-auto p-8 overflow-x-auto">
         {/* 모든 섹션을 하나의 행에 배치 */}
-        <div style={{
-          display: 'flex',
-          flexDirection: 'row',
-          gap: '2rem',
-          minWidth: '1400px'
-        }}>
+        <div className="flex flex-row gap-8 min-w-[1400px]">
           {/* 관찰 추천 학생 */}
-          <div style={{
-            width: '33.333%',
-            backgroundColor: 'white',
-            borderRadius: '0.75rem',
-            border: '1px solid #e5e7eb',
-            padding: '2rem',
-            minHeight: '600px',
-            overflow: 'hidden',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)'
-          }}>
-            <div style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between', 
-              alignItems: 'center', 
-              marginBottom: '1.25rem',
-              borderBottom: '1px solid #f3f4f6',
-              paddingBottom: '1rem'
-            }}>
-              <h2 style={{ 
-                fontSize: '1.25rem', 
-                fontWeight: 600, 
-                color: '#111827',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
-              }}>
+          <div className="w-1/3 bg-white rounded-xl border border-gray-200 p-8 min-h-[600px] overflow-hidden shadow-sm">
+            <div className="flex justify-between items-center mb-5 border-b border-gray-100 pb-4">
+              <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#4f46e5" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
@@ -195,26 +162,7 @@ export default function Dashboard() {
               </h2>
               <button 
                 onClick={() => router.push('/students')}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.25rem',
-                  padding: '0.5rem 0.75rem',
-                  borderRadius: '0.375rem',
-                  fontSize: '0.875rem',
-                  fontWeight: 500,
-                  backgroundColor: '#f9fafb',
-                  color: '#4f46e5',
-                  border: '1px solid #e5e7eb',
-                  transition: 'all 0.2s ease',
-                  cursor: 'pointer'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f3f4f6';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f9fafb';
-                }}
+                className="flex items-center gap-1 px-3 py-2 rounded-md text-sm font-medium bg-gray-50 text-indigo-600 border border-gray-200 transition-all hover:bg-gray-100"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -225,72 +173,21 @@ export default function Dashboard() {
             </div>
             
             {recommendedStudents.length === 0 ? (
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '3rem 1.5rem',
-                textAlign: 'center',
-                backgroundColor: '#f9fafb',
-                borderRadius: '0.5rem',
-                border: '1px dashed #d1d5db',
-                margin: '1rem 0',
-                height: '70%'
-              }}>
-                <div style={{
-                  backgroundColor: '#eef2ff',
-                  borderRadius: '50%',
-                  width: '4rem',
-                  height: '4rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: '1rem'
-                }}>
+              <div className="flex flex-col items-center justify-center p-12 text-center bg-gray-50 rounded-lg border border-dashed border-gray-300 my-4 h-[70%]">
+                <div className="bg-indigo-50 rounded-full w-16 h-16 flex items-center justify-center mb-4">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="#4f46e5">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                   </svg>
                 </div>
-                <p style={{ 
-                  fontSize: '0.938rem',
-                  fontWeight: 500,
-                  color: '#4b5563',
-                  marginBottom: '0.5rem'
-                }}>
+                <p className="text-[0.938rem] font-medium text-gray-600 mb-2">
                   추천 학생이 없습니다
                 </p>
-                <p style={{ 
-                  fontSize: '0.875rem',
-                  color: '#6b7280',
-                  marginBottom: '1.5rem',
-                  maxWidth: '80%'
-                }}>
+                <p className="text-sm text-gray-500 mb-6 max-w-[80%]">
                   학생 목록에서 관찰이 필요한 학생을 추가해보세요
                 </p>
                 <button 
                   onClick={() => router.push('/students')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.375rem',
-                    padding: '0.625rem 1rem',
-                    borderRadius: '0.375rem',
-                    fontSize: '0.875rem',
-                    fontWeight: 500,
-                    backgroundColor: '#4f46e5',
-                    color: 'white',
-                    border: 'none',
-                    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#4338ca';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#4f46e5';
-                  }}
+                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-md text-sm font-medium bg-indigo-600 text-white border-none shadow-sm hover:bg-indigo-700 transition-colors"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -299,75 +196,32 @@ export default function Dashboard() {
                 </button>
               </div>
             ) : (
-              <div style={{ overflowY: 'auto', maxHeight: '450px', paddingRight: '0.5rem' }}>
-                <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <div className="overflow-y-auto max-h-[450px] pr-2">
+                <ul className="flex flex-col gap-3">
                   {recommendedStudents.map(student => (
                     <li 
                       key={student.id}
-                      style={{ 
-                        padding: '1rem',
-                        borderRadius: '0.5rem',
-                        border: '1px solid #e5e7eb',
-                        backgroundColor: 'white',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease',
-                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
-                      }}
+                      className="p-4 rounded-lg border border-gray-200 bg-white cursor-pointer transition-all hover:border-gray-300 hover:bg-gray-50 shadow-sm"
                       onClick={() => router.push(`/students/${student.id}`)}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor = '#d1d5db';
-                        e.currentTarget.style.backgroundColor = '#f9fafb';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = '#e5e7eb';
-                        e.currentTarget.style.backgroundColor = 'white';
-                      }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <div style={{
-                          width: '2.5rem',
-                          height: '2.5rem',
-                          borderRadius: '50%',
-                          backgroundColor: '#eef2ff',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          flexShrink: 0
-                        }}>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center flex-shrink-0">
                           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#4f46e5">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                           </svg>
                         </div>
                         <div>
-                          <h3 style={{ 
-                            fontWeight: 500, 
-                            fontSize: '0.938rem',
-                            color: '#111827',
-                            marginBottom: '0.25rem'
-                          }}>
+                          <h3 className="font-medium text-[0.938rem] text-gray-900 mb-1">
                             {student.name}
                           </h3>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                            <p style={{ 
-                              fontSize: '0.75rem',
-                              color: '#6b7280',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '0.25rem'
-                            }}>
+                          <div className="flex items-center gap-3">
+                            <p className="text-xs text-gray-500 flex items-center gap-1">
                               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                               </svg>
                               {student.lastObservation ? formatDate(student.lastObservation) : '관찰 기록 없음'}
                             </p>
-                            <div style={{
-                              fontSize: '0.75rem',
-                              padding: '0.125rem 0.5rem',
-                              backgroundColor: '#eef2ff',
-                              color: '#4f46e5',
-                              borderRadius: '9999px',
-                              fontWeight: 500
-                            }}>
+                            <div className="text-xs py-0.5 px-2 bg-indigo-50 text-indigo-600 rounded-full font-medium">
                               {student.observationCount}회 관찰
                             </div>
                           </div>
@@ -381,32 +235,10 @@ export default function Dashboard() {
           </div>
           
           {/* 내 노트 목록 */}
-          <div style={{
-            width: '33.333%',
-            backgroundColor: 'white',
-            borderRadius: '0.75rem',
-            border: '1px solid #e5e7eb',
-            padding: '2rem',
-            minHeight: '600px',
-            overflow: 'hidden',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)'
-          }}>
-            <div style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between', 
-              alignItems: 'center', 
-              marginBottom: '1.25rem',
-              borderBottom: '1px solid #f3f4f6',
-              paddingBottom: '1rem'
-            }}>
-              <h2 style={{ 
-                fontSize: '1.25rem', 
-                fontWeight: 600, 
-                color: '#111827',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
-              }}>
+          <div className="w-1/3 bg-white rounded-xl border border-gray-200 p-8 min-h-[600px] overflow-hidden shadow-sm">
+            {/* 내 노트 헤더 및 내용 - 위와 동일한 패턴으로 변환 */}
+            <div className="flex justify-between items-center mb-5 border-b border-gray-100 pb-4">
+              <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#4f46e5" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
@@ -419,26 +251,7 @@ export default function Dashboard() {
                   setContent('');
                   setIsEditing(false);
                 }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.25rem',
-                  padding: '0.5rem 0.75rem',
-                  borderRadius: '0.375rem',
-                  fontSize: '0.875rem',
-                  fontWeight: 500,
-                  backgroundColor: '#f9fafb',
-                  color: '#4f46e5',
-                  border: '1px solid #e5e7eb',
-                  transition: 'all 0.2s ease',
-                  cursor: 'pointer'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f3f4f6';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f9fafb';
-                }}
+                className="flex items-center gap-1 px-3 py-2 rounded-md text-sm font-medium bg-gray-50 text-indigo-600 border border-gray-200 transition-all hover:bg-gray-100"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
