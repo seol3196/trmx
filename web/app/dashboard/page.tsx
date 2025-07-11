@@ -148,11 +148,11 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 메인 컨텐츠 */}
-      <div className="max-w-7xl mx-auto p-8 overflow-x-auto">
-        {/* 모든 섹션을 하나의 행에 배치 */}
-        <div className="flex flex-row gap-8 min-w-[1400px]">
+      <div className="max-w-7xl mx-auto p-4 md:p-8">
+        {/* 모든 섹션을 하나의 행에 배치 - 반응형으로 변경 */}
+        <div className="flex flex-col lg:flex-row gap-4 md:gap-8">
           {/* 관찰 추천 학생 */}
-          <div className="w-1/3 bg-white rounded-xl border border-gray-200 p-8 min-h-[600px] overflow-hidden shadow-sm">
+          <div className="w-full lg:w-1/3 bg-white rounded-xl border border-gray-200 p-4 md:p-8 min-h-[600px] overflow-hidden shadow-sm">
             <div className="flex justify-between items-center mb-5 border-b border-gray-100 pb-4">
               <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#4f46e5" strokeWidth="2">
@@ -235,7 +235,7 @@ export default function Dashboard() {
           </div>
           
           {/* 내 노트 목록 */}
-          <div className="w-1/3 bg-white rounded-xl border border-gray-200 p-8 min-h-[600px] overflow-hidden shadow-sm">
+          <div className="w-full lg:w-1/3 bg-white rounded-xl border border-gray-200 p-4 md:p-8 min-h-[600px] overflow-hidden shadow-sm">
             {/* 내 노트 헤더 및 내용 - 위와 동일한 패턴으로 변환 */}
             <div className="flex justify-between items-center mb-5 border-b border-gray-100 pb-4">
               <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
@@ -459,36 +459,13 @@ export default function Dashboard() {
           </div>
           
           {/* 노트 편집 영역 */}
-          <div style={{
-            width: '33.333%',
-            backgroundColor: 'white',
-            borderRadius: '0.75rem',
-            border: '1px solid #e5e7eb',
-            padding: '2rem',
-            minHeight: '600px',
-            overflow: 'hidden',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)'
-          }}>
-            <div style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between', 
-              alignItems: 'center', 
-              marginBottom: '1.25rem',
-              borderBottom: '1px solid #f3f4f6',
-              paddingBottom: '1rem'
-            }}>
-              <h2 style={{ 
-                fontSize: '1.25rem', 
-                fontWeight: 600, 
-                color: '#111827',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
-              }}>
+          <div className="w-full lg:w-1/3 bg-white rounded-xl border border-gray-200 p-4 md:p-8 min-h-[600px] overflow-hidden shadow-sm">
+            <div className="flex justify-between items-center mb-5 border-b border-gray-100 pb-4">
+              <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#4f46e5" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
-                {isEditing ? '노트 편집' : '새 노트 작성'}
+                {isEditing ? '노트 수정' : '새 노트 작성'}
               </h2>
               {isEditing && (
                 <button 
@@ -526,148 +503,31 @@ export default function Dashboard() {
                 </button>
               )}
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100% - 4rem)' }}>
-              <div style={{ marginBottom: '1rem' }}>
-                <label 
-                  htmlFor="title" 
-                  style={{ 
-                    display: 'block', 
-                    marginBottom: '0.5rem', 
-                    fontSize: '0.875rem', 
-                    fontWeight: 500, 
-                    color: '#4b5563' 
-                  }}
-                >
-                  제목
-                </label>
+            <div className="flex flex-col gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">제목</label>
                 <input
-                  id="title"
                   type="text"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                  placeholder="노트 제목"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="노트 제목을 입력하세요"
-                  style={{
-                    width: '100%',
-                    padding: '0.625rem 0.75rem',
-                    borderRadius: '0.375rem',
-                    border: '1px solid #d1d5db',
-                    fontSize: '0.875rem',
-                    outline: 'none',
-                    transition: 'border-color 0.2s ease',
-                    backgroundColor: 'white'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#a5b4fc';
-                    e.target.style.boxShadow = '0 0 0 1px rgba(99, 102, 241, 0.2)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#d1d5db';
-                    e.target.style.boxShadow = 'none';
-                  }}
                 />
               </div>
-              <div style={{ marginBottom: '1.5rem', flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                <label 
-                  htmlFor="content" 
-                  style={{ 
-                    display: 'block', 
-                    marginBottom: '0.5rem', 
-                    fontSize: '0.875rem', 
-                    fontWeight: 500, 
-                    color: '#4b5563' 
-                  }}
-                >
-                  내용
-                </label>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">내용</label>
                 <textarea
-                  id="content"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all min-h-[300px]"
+                  placeholder="노트 내용"
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  placeholder="노트 내용을 입력하세요"
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    borderRadius: '0.375rem',
-                    border: '1px solid #d1d5db',
-                    fontSize: '0.875rem',
-                    outline: 'none',
-                    transition: 'border-color 0.2s ease',
-                    backgroundColor: 'white',
-                    resize: 'none',
-                    flexGrow: 1,
-                    minHeight: '200px'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#a5b4fc';
-                    e.target.style.boxShadow = '0 0 0 1px rgba(99, 102, 241, 0.2)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#d1d5db';
-                    e.target.style.boxShadow = 'none';
-                  }}
-                />
+                ></textarea>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
-                {isEditing && (
-                  <button 
-                    onClick={() => {
-                      setIsEditing(false);
-                      setSelectedNote(null);
-                      setTitle('');
-                      setContent('');
-                    }}
-                    style={{
-                      padding: '0.625rem 1rem',
-                      borderRadius: '0.375rem',
-                      fontSize: '0.875rem',
-                      fontWeight: 500,
-                      backgroundColor: 'white',
-                      color: '#4b5563',
-                      border: '1px solid #d1d5db',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#f9fafb';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'white';
-                    }}
-                  >
-                    취소
-                  </button>
-                )}
-                <button 
+              <div className="flex justify-end">
+                <button
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                   onClick={isEditing ? handleUpdateNote : handleAddNote}
-                  disabled={!title.trim()}
-                  style={{
-                    padding: '0.625rem 1.25rem',
-                    borderRadius: '0.375rem',
-                    fontSize: '0.875rem',
-                    fontWeight: 500,
-                    backgroundColor: title.trim() ? '#4f46e5' : '#a5b4fc',
-                    color: 'white',
-                    border: 'none',
-                    cursor: title.trim() ? 'pointer' : 'not-allowed',
-                    transition: 'all 0.2s ease',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.375rem'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (title.trim()) {
-                      e.currentTarget.style.backgroundColor = '#4338ca';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (title.trim()) {
-                      e.currentTarget.style.backgroundColor = '#4f46e5';
-                    }
-                  }}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-                  </svg>
                   {isEditing ? '수정하기' : '저장하기'}
                 </button>
               </div>
