@@ -18,9 +18,20 @@ export default function AuthCallback() {
         console.log('현재 URL:', window.location.href);
         
         // URL에서 코드 파라미터 확인
-        const urlParams = new URLSearchParams(window.location.search);
-        const code = urlParams.get('code');
+        const code = searchParams?.get('code');
         console.log('인증 코드:', code);
+        
+        if (code) {
+          // 코드가 있으면 세션 교환 시도
+          const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+          console.log('코드 교환 결과:', { data, error });
+          
+          if (error) {
+            console.error('인증 코드 교환 오류:', error);
+            setTimeout(() => router.push('/auth/login'), 2000);
+            return;
+          }
+        }
         
         // 세션 확인
         const { data, error } = await supabase.auth.getSession();
@@ -40,13 +51,10 @@ export default function AuthCallback() {
           // 세션이 있으면 성공
           console.log('로그인 성공, 리디렉션 준비');
           
-          // 세션을 localStorage에도 저장 (백업용)
-          localStorage.setItem('supabase_session', JSON.stringify(data.session));
-          
           // 약간의 지연 후 리디렉션
           setTimeout(() => {
             console.log('리디렉션 실행:', redirectTo);
-            window.location.href = redirectTo;
+            router.push(redirectTo);
           }, 2000);
         } else {
           console.log('세션이 없음, 로그인 페이지로 이동');

@@ -55,7 +55,11 @@ export async function middleware(request: NextRequest) {
     // 인증되지 않은 사용자가 보호된 페이지에 접근하려는 경우
     if (!isAuthenticated && isProtectedRoute) {
       console.log('미인증 사용자 -> 로그인 페이지로 리디렉트');
-      return NextResponse.redirect(new URL('/auth/login', request.url));
+      
+      // 현재 URL을 next 파라미터로 추가하여 로그인 후 원래 페이지로 돌아올 수 있게 함
+      const redirectUrl = new URL('/auth/login', request.url);
+      redirectUrl.searchParams.set('next', request.nextUrl.pathname);
+      return NextResponse.redirect(redirectUrl);
     }
 
     // 그 외의 경우 정상 진행
