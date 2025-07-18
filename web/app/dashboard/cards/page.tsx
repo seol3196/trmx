@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
 
 // 타입 정의
 interface Student {
@@ -19,6 +20,7 @@ interface Card {
   icon: string;
 }
 
+// 카드 기록 타입 정의
 interface CardRecord {
   id: string;
   studentId: string;
@@ -27,6 +29,7 @@ interface CardRecord {
   memo: string;
   recordedDate: Date;
   serverSynced?: boolean;
+  userId?: string; // 사용자 ID 필드 추가
 }
 
 export default function CardsPage() {
@@ -43,12 +46,24 @@ export default function CardsPage() {
     const loadData = async () => {
       setIsLoading(true);
       try {
-        // 학생 데이터 가져오기 - API 사용
-        const studentsResponse = await fetch('/api/students');
+        // 현재 로그인된 사용자 정보 가져오기
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+          console.error('로그인된 사용자 세션이 없습니다.');
+          return;
+        }
+        
+        const userId = session.user.id;
+        console.log('현재 로그인된 사용자 ID:', userId);
+        
+        // 학생 데이터 가져오기 - API 사용 (사용자 ID로 필터링)
+        const studentsResponse = await fetch(`/api/students?userId=${userId}`);
         if (!studentsResponse.ok) {
           throw new Error('학생 데이터를 불러오는데 실패했습니다.');
         }
         const studentsData = await studentsResponse.json();
+        console.log('로드된 학생 데이터:', studentsData.length, '명');
         setStudents(studentsData);
         
         // 카드 데이터 가져오기 - API 사용
@@ -57,6 +72,7 @@ export default function CardsPage() {
           throw new Error('카드 데이터를 불러오는데 실패했습니다.');
         }
         const cardsData = await cardsResponse.json();
+        console.log('로드된 카드 데이터:', cardsData.length, '개');
         setCards(cardsData);
         
         // 첫 번째 과목을 기본 선택으로 설정
@@ -99,9 +115,25 @@ export default function CardsPage() {
       return;
     }
     
+    console.log('카드 클릭:', card);
+    console.log('선택된 학생들:', selectedStudents);
+    
     setIsSaving(true);
     
     try {
+      // 현재 로그인된 사용자 정보 가져오기
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        console.error('로그인된 사용자 세션이 없습니다.');
+        alert('로그인 상태를 확인해주세요.');
+        setIsSaving(false);
+        return;
+      }
+      
+      const userId = session.user.id;
+      console.log('카드 저장 - 사용자 ID:', userId);
+      
       const successfulStudents: string[] = [];
       const failedStudents: string[] = [];
       
@@ -113,8 +145,11 @@ export default function CardsPage() {
           cardId: card.id,
           subject: selectedSubject,
           memo: memo || card.description,
-          recordedDate: new Date()
+          recordedDate: new Date(),
+          userId: userId // 사용자 ID 추가
         };
+        
+        console.log('저장할 기록:', newRecord);
         
         try {
           // API를 통해 기록 저장
@@ -126,9 +161,13 @@ export default function CardsPage() {
             body: JSON.stringify(newRecord)
           });
           
+          const responseData = await response.json();
+          console.log('API 응답:', response.status, responseData);
+          
           if (response.ok) {
             successfulStudents.push(student.name);
           } else {
+            console.error('API 오류:', responseData);
             failedStudents.push(student.name);
           }
         } catch (error) {
@@ -165,6 +204,19 @@ export default function CardsPage() {
     setIsSaving(true);
     
     try {
+      // 현재 로그인된 사용자 정보 가져오기
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        console.error('로그인된 사용자 세션이 없습니다.');
+        alert('로그인 상태를 확인해주세요.');
+        setIsSaving(false);
+        return;
+      }
+      
+      const userId = session.user.id;
+      console.log('메모 저장 - 사용자 ID:', userId);
+      
       const successfulStudents: string[] = [];
       const failedStudents: string[] = [];
       
@@ -176,7 +228,8 @@ export default function CardsPage() {
           cardId: null,
           subject: selectedSubject,
           memo: memo,
-          recordedDate: new Date()
+          recordedDate: new Date(),
+          userId: userId // 사용자 ID 추가
         };
         
         try {

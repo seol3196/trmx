@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createBrowserClient } from '@/lib/supabase';
 import { Provider } from '@supabase/supabase-js';
 
@@ -52,6 +52,16 @@ export function OAuthButtons({
   
   // Supabase 클라이언트 생성
   const supabase = createBrowserClient();
+  
+  // 컴포넌트 마운트 시 로컬 스토리지 확인
+  useEffect(() => {
+    // 디버깅용: 로컬 스토리지의 모든 키 확인
+    console.log('로컬 스토리지 키 목록:', Object.keys(localStorage));
+    
+    // code_verifier가 있는지 확인
+    const codeVerifier = localStorage.getItem('supabase.auth.code_verifier');
+    console.log('기존 코드 검증기 존재 여부:', !!codeVerifier);
+  }, []);
 
   /**
    * OAuth 로그인 처리 함수
@@ -62,8 +72,12 @@ export function OAuthButtons({
     setIsLoading(provider);
     
     try {
+      // 기존 코드 검증기 제거 (새로운 인증 시도를 위해)
+      localStorage.removeItem('supabase.auth.code_verifier');
+      console.log('기존 코드 검증기 제거됨');
+      
       // OAuth 로그인 요청
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
           // 콜백 URL을 통해 인증 후 리디렉션 처리
@@ -78,6 +92,15 @@ export function OAuthButtons({
       
       // 오류 발생 시 예외 처리
       if (error) throw error;
+      
+      // 디버깅: 응답 데이터 확인
+      console.log('OAuth 요청 결과:', data);
+      
+      // 리디렉션 전에 코드 검증기가 저장되었는지 확인
+      setTimeout(() => {
+        const codeVerifier = localStorage.getItem('supabase.auth.code_verifier');
+        console.log('리디렉션 전 코드 검증기 존재 여부:', !!codeVerifier);
+      }, 500);
       
     } catch (error: any) {
       console.error(`${provider} 로그인 오류:`, error);

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useParams } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 
 // 학생 타입 정의
 interface Student {
@@ -53,6 +54,10 @@ export default function StudentDetailPage() {
       try {
         setIsLoading(true);
         
+        // 현재 로그인된 사용자 정보 가져오기
+        const { data: { session } } = await supabase.auth.getSession();
+        const userId = session?.user?.id || 'a729c507-8d88-45d8-b15e-c945fe836b68'; // wogh0625@gmail.com의 ID를 기본값으로 사용
+        
         // 학생 정보 가져오기
         const studentResponse = await fetch(`/api/students?id=${studentId}`);
         if (!studentResponse.ok) {
@@ -69,7 +74,7 @@ export default function StudentDetailPage() {
         setStudent(studentData);
         
         // 학생의 노트 기록 가져오기
-        const notesResponse = await fetch(`/api/notes?studentId=${studentId}`);
+        const notesResponse = await fetch(`/api/notes?studentId=${studentId}&userId=${userId}`);
         let notesData: Note[] = [];
         if (notesResponse.ok) {
           const rawNotesData = await notesResponse.json();
@@ -80,7 +85,7 @@ export default function StudentDetailPage() {
         }
         
         // 학생의 카드 기록 가져오기
-        const recordsResponse = await fetch(`/api/records`);
+        const recordsResponse = await fetch(`/api/records?userId=${userId}`);
         let recordsData: CardRecord[] = [];
         if (recordsResponse.ok) {
           const rawRecordsData = await recordsResponse.json();

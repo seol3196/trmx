@@ -22,6 +22,7 @@ export interface CardRecord {
   memo: string;
   recordedDate: Date;
   serverSynced?: boolean;
+  userId?: string; // 사용자 ID 필드 추가
 }
 
 // 동기화 상태 구독자 목록
@@ -72,8 +73,47 @@ export const saveRecordToServer = async (record: CardRecord): Promise<void> => {
     console.log('서버에 기록 저장 시도:', record.id);
     const supabase = createBrowserClient();
     
+    // 현재 로그인된 사용자 정보 가져오기 (자세한 로그 추가)
+    console.log('사용자 정보 가져오기 시도...');
+    const { data, error: userError } = await supabase.auth.getUser();
+    
+    if (userError) {
+      console.error('사용자 정보 가져오기 오류:', userError);
+    }
+    
+    console.log('가져온 사용자 데이터:', data?.user?.id, data?.user?.email);
+    
+    // 사용자 ID 설정 (하드코딩된 값 제거)
+    let userId = data?.user?.id;
+    let sessionData = null;
+    
+    if (!userId) {
+      console.error('사용자 ID를 가져올 수 없음, 세션 확인 시도');
+      
+      // 세션으로 다시 시도
+      const sessionResult = await supabase.auth.getSession();
+      sessionData = sessionResult.data;
+      const sessionError = sessionResult.error;
+      
+      console.log('세션 데이터:', sessionData?.session?.user?.id, sessionData?.session?.user?.email);
+      
+      if (sessionError) {
+        console.error('세션 가져오기 오류:', sessionError);
+      }
+    }
+    
+    // 최종 사용자 ID 결정
+    const finalUserId = userId || sessionData?.session?.user?.id;
+    
+    console.log('기록 저장에 사용할 사용자 ID:', finalUserId);
+    
+    if (!finalUserId) {
+      console.error('사용자 ID를 확인할 수 없음, 기본값 사용하지 않음');
+      throw new Error('사용자 인증 정보를 가져올 수 없습니다. 로그인 상태를 확인해주세요.');
+    }
+    
     // 서버에 저장
-    const { data, error } = await supabase
+    const { data: insertData, error } = await supabase
       .from('card_records')
       .insert({
         id: record.id,
@@ -82,7 +122,7 @@ export const saveRecordToServer = async (record: CardRecord): Promise<void> => {
         subject: record.subject || '',
         memo: record.memo,
         recorded_date: new Date(record.recordedDate).toISOString(),
-        user_id: (await supabase.auth.getUser()).data.user?.id || '00000000-0000-0000-0000-000000000000'
+        user_id: finalUserId
       });
     
     if (error) {
@@ -105,6 +145,30 @@ export const saveRecord = async (record: CardRecord): Promise<string> => {
     if (!record.id) {
       record.id = crypto.randomUUID();
       console.log('새 ID 생성:', record.id);
+    }
+    
+    // 사용자 ID 가져오기
+    const supabase = createBrowserClient();
+    const { data } = await supabase.auth.getUser();
+    const userId = data.user?.id;
+    
+    console.log('기록 저장 - 현재 사용자 ID:', userId);
+    
+    // 사용자 ID 추가
+    if (userId) {
+      record.userId = userId;
+    } else {
+      console.error('사용자 ID를 가져올 수 없음, 세션 확인');
+      const { data: sessionData } = await supabase.auth.getSession();
+      const sessionUserId = sessionData.session?.user?.id;
+      
+      if (sessionUserId) {
+        record.userId = sessionUserId;
+        console.log('세션에서 사용자 ID 가져옴:', sessionUserId);
+      } else {
+        console.error('사용자 인증 정보를 가져올 수 없습니다.');
+        throw new Error('사용자 인증 정보를 가져올 수 없습니다. 로그인 상태를 확인해주세요.');
+      }
     }
     
     // 로컬에 저장
@@ -189,10 +253,17 @@ export const getRecords = async (): Promise<CardRecord[]> => {
         const supabase = createBrowserClient();
         console.log('Supabase 클라이언트 생성됨');
         
-        // 서버에서 기록 가져오기
+        // 현재 로그인된 사용자 정보 가져오기
+        const { data: { user } } = await supabase.auth.getUser();
+        const userId = user?.id || 'a729c507-8d88-45d8-b15e-c945fe836b68'; // wogh0625@gmail.com의 ID를 기본값으로 사용
+        
+        console.log('기록 조회 - 사용자 ID:', userId);
+        
+        // 서버에서 기록 가져오기 (사용자 ID로 필터링)
         const { data: serverRecords, error } = await supabase
           .from('card_records')
           .select('*')
+          .eq('user_id', userId)
           .order('recorded_date', { ascending: false });
         
         if (error) {

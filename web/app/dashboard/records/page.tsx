@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
 
 // 타입 정의
 interface Student {
@@ -67,12 +68,24 @@ export default function RecordsPage() {
     const loadData = async () => {
       setIsLoading(true);
       try {
-        // 학생 데이터 가져오기 - API 사용
-        const studentsResponse = await fetch('/api/students');
+        // 현재 로그인된 사용자 정보 가져오기
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+          console.error('로그인된 사용자 세션이 없습니다.');
+          return;
+        }
+        
+        const userId = session.user.id;
+        console.log('현재 로그인된 사용자 ID:', userId);
+        
+        // 학생 데이터 가져오기 - API 사용 (사용자 ID로 필터링)
+        const studentsResponse = await fetch(`/api/students?userId=${userId}`);
         if (!studentsResponse.ok) {
           throw new Error('학생 데이터를 불러오는데 실패했습니다.');
         }
         const studentsData = await studentsResponse.json();
+        console.log('로드된 학생 데이터:', studentsData.length, '명');
         
         // 카드 데이터 가져오기 - API 사용
         const cardsResponse = await fetch('/api/cards');
@@ -80,13 +93,15 @@ export default function RecordsPage() {
           throw new Error('카드 데이터를 불러오는데 실패했습니다.');
         }
         const cardsData = await cardsResponse.json();
+        console.log('로드된 카드 데이터:', cardsData.length, '개');
         
         // 기록 데이터 가져오기 - API 사용
-        const recordsResponse = await fetch('/api/records');
+        const recordsResponse = await fetch(`/api/records?userId=${userId}`);
         if (!recordsResponse.ok) {
           throw new Error('기록 데이터를 불러오는데 실패했습니다.');
         }
         const recordsData = await recordsResponse.json();
+        console.log('로드된 기록 데이터:', recordsData.length, '개');
         
         // 기록 데이터에 학생 및 카드 정보 추가
         const enrichedRecords = recordsData.map((record: any) => {
@@ -131,8 +146,18 @@ export default function RecordsPage() {
         throw new Error(errorData.error || '기록 삭제 중 오류가 발생했습니다.');
       }
       
-      // 기록 데이터 다시 로드
-      const recordsResponse = await fetch('/api/records');
+      // 현재 로그인된 사용자 정보 가져오기
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        console.error('로그인된 사용자 세션이 없습니다.');
+        return;
+      }
+      
+      const userId = session.user.id;
+      
+      // 기록 데이터 다시 로드 (사용자 ID 포함)
+      const recordsResponse = await fetch(`/api/records?userId=${userId}`);
       if (!recordsResponse.ok) {
         throw new Error('기록 데이터를 불러오는데 실패했습니다.');
       }

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import RecommendedStudents from '../../components/RecommendedStudents';
 import { useRouter } from 'next/navigation';
+import { supabase as supabaseClient } from '@/lib/supabase';
 
 // 노트 타입 정의
 interface Note {
@@ -31,6 +32,7 @@ export default function Dashboard() {
   const [isEditing, setIsEditing] = useState(false);
   const [recommendedStudents, setRecommendedStudents] = useState<Student[]>([]);
   const router = useRouter();
+  const supabase = supabaseClient;
 
   // 로컬 스토리지에서 노트 불러오기
   useEffect(() => {
@@ -52,7 +54,20 @@ export default function Dashboard() {
     // 추천 학생 데이터를 API에서 가져옵니다
     const fetchRecommendedStudents = async () => {
       try {
-        const response = await fetch('/api/students/recommended');
+        // 현재 로그인된 사용자 정보 가져오기
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+          console.error('로그인된 사용자 세션이 없습니다.');
+          setRecommendedStudents([]);
+          return;
+        }
+        
+        const userId = session.user.id;
+        console.log('현재 로그인된 사용자 ID:', userId);
+        
+        // 사용자 ID로 필터링하여 추천 학생 데이터 가져오기
+        const response = await fetch(`/api/students/recommended?userId=${userId}`);
         if (response.ok) {
           const data = await response.json();
           // 날짜 문자열을 Date 객체로 변환
@@ -162,7 +177,17 @@ export default function Dashboard() {
                 추천 학생
               </h2>
               <button 
-                onClick={() => router.push('/students')}
+                onClick={async () => {
+                  // 현재 로그인된 사용자 정보 가져오기
+                  const { data: { session } } = await supabase.auth.getSession();
+                  
+                  if (session) {
+                    const userId = session.user.id;
+                    router.push(`/students?userId=${userId}`);
+                  } else {
+                    router.push('/students');
+                  }
+                }}
                 className="flex items-center gap-1 px-3 py-2 rounded-md text-sm font-medium bg-gray-50 text-indigo-600 border border-gray-200 transition-all hover:bg-gray-100"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -187,7 +212,17 @@ export default function Dashboard() {
                   학생 목록에서 관찰이 필요한 학생을 추가해보세요
                 </p>
                 <button 
-                  onClick={() => router.push('/students')}
+                  onClick={async () => {
+                    // 현재 로그인된 사용자 정보 가져오기
+                    const { data: { session } } = await supabase.auth.getSession();
+                    
+                    if (session) {
+                      const userId = session.user.id;
+                      router.push(`/students?userId=${userId}`);
+                    } else {
+                      router.push('/students');
+                    }
+                  }}
                   className="flex items-center gap-1.5 px-4 py-2.5 rounded-md text-sm font-medium bg-indigo-600 text-white border-none shadow-sm hover:bg-indigo-700 transition-colors"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">

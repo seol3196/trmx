@@ -22,18 +22,44 @@ export default function AuthCallback() {
         console.log('인증 코드:', code);
         
         if (code) {
-          // 코드가 있으면 세션 교환 시도
-          const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-          console.log('코드 교환 결과:', { data, error });
-          
-          if (error) {
-            console.error('인증 코드 교환 오류:', error);
-            setTimeout(() => router.push('/auth/login'), 2000);
+          try {
+            // 세션 교환 전에 로컬 스토리지에 code_verifier가 있는지 확인
+            const codeVerifier = localStorage.getItem('supabase.auth.code_verifier');
+            console.log('코드 검증기 존재 여부:', !!codeVerifier);
+            
+            if (!codeVerifier) {
+              console.error('코드 검증기가 없습니다. 로그인 페이지로 리디렉션합니다.');
+              setTimeout(() => router.push('/auth/login'), 1000);
+              return;
+            }
+            
+            const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+            console.log('코드 교환 결과:', { data, error });
+            
+            if (error) {
+              console.error('인증 코드 교환 오류:', error);
+              setTimeout(() => router.push('/auth/login'), 1000);
+              return;
+            }
+            
+            // 성공적으로 교환되었다면 리디렉션
+            console.log('인증 성공, 리디렉션 준비');
+            
+            // 세션이 제대로 설정되었는지 확인
+            const { data: sessionData } = await supabase.auth.getSession();
+            console.log('세션 확인:', sessionData?.session ? '있음' : '없음');
+            
+            // 직접 URL로 이동 (Next.js router 대신)
+            window.location.href = redirectTo;
+            return;
+          } catch (exchangeError) {
+            console.error('코드 교환 중 예외 발생:', exchangeError);
+            setTimeout(() => router.push('/auth/login'), 1000);
             return;
           }
         }
         
-        // 세션 확인
+        // 코드가 없거나 교환에 실패한 경우 세션 확인
         const { data, error } = await supabase.auth.getSession();
         
         console.log('세션 데이터:', data);
@@ -51,18 +77,15 @@ export default function AuthCallback() {
           // 세션이 있으면 성공
           console.log('로그인 성공, 리디렉션 준비');
           
-          // 약간의 지연 후 리디렉션
-          setTimeout(() => {
-            console.log('리디렉션 실행:', redirectTo);
-            router.push(redirectTo);
-          }, 2000);
+          // 직접 URL로 이동 (Next.js router 대신)
+          window.location.href = redirectTo;
         } else {
           console.log('세션이 없음, 로그인 페이지로 이동');
-          setTimeout(() => router.push('/auth/login'), 2000);
+          setTimeout(() => router.push('/auth/login'), 1000);
         }
       } catch (error) {
         console.error('콜백 처리 오류:', error);
-        setTimeout(() => router.push('/auth/login'), 2000);
+        setTimeout(() => router.push('/auth/login'), 1000);
       }
     };
     

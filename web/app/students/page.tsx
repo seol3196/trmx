@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 
 // 학생 타입 정의
 interface Student {
@@ -30,31 +31,67 @@ interface CardRecord {
 
 export default function StudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-
+  
+  // 학생 데이터 불러오기
   useEffect(() => {
     const fetchStudents = async () => {
       try {
+        console.log('[페이지] 학생 데이터 요청 시작');
         setIsLoading(true);
-        const response = await fetch('/api/students');
+        setError(null);
+        
+        // 현재 로그인된 사용자 정보 가져오기
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+          console.error('로그인된 사용자 세션이 없습니다.');
+          setError('로그인이 필요합니다.');
+          setIsLoading(false);
+          return;
+        }
+        
+        const userId = session.user.id;
+        console.log('현재 로그인된 사용자 ID:', userId);
+        
+        // 학생 데이터 요청 (사용자 ID로 필터링)
+        console.log('[페이지] /api/students 요청');
+        const response = await fetch(`/api/students?userId=${userId}`);
+        
+        console.log('[페이지] 학생 API 응답 상태:', response.status, response.statusText);
         
         if (!response.ok) {
-          throw new Error('학생 데이터를 불러오는데 실패했습니다.');
+          throw new Error(`학생 데이터를 불러오는데 실패했습니다. 상태 코드: ${response.status}`);
         }
         
         const studentsData = await response.json();
+        console.log('[페이지] 학생 데이터 수:', studentsData?.length || 0);
+        
+        // 데이터가 없는 경우 빈 배열로 설정
+        if (!studentsData || studentsData.length === 0) {
+          console.log('[페이지] 학생 데이터가 없습니다.');
+          setStudents([]);
+          setIsLoading(false);
+          return;
+        }
         
         // 각 학생의 관찰 기록 수 가져오기 (노트)
-        const notesResponse = await fetch('/api/notes');
+        console.log('[페이지] 노트 데이터 요청');
+        const notesResponse = await fetch(`/api/notes?userId=${userId}`);
         const notesData = notesResponse.ok ? await notesResponse.json() : [];
+        console.log('[페이지] 노트 데이터 수:', notesData?.length || 0);
         
         // 각 학생의 관찰 기록 수 가져오기 (카드 기록)
-        const recordsResponse = await fetch('/api/records');
+        console.log('[페이지] 카드 기록 데이터 요청');
+        const recordsResponse = await fetch(`/api/records?userId=${userId}`);
         const recordsData = recordsResponse.ok ? await recordsResponse.json() : [];
+        console.log('[페이지] 카드 기록 데이터 수:', recordsData?.length || 0);
         
         // 학생별 관찰 기록 수와 최신 관찰 날짜 계산
+        console.log('[페이지] 학생 데이터 처리 시작');
         const studentsWithObservations = studentsData.map((student: any) => {
           // 노트 데이터 필터링
           const studentNotes = notesData.filter((note: any) => note.student_id === student.id);
@@ -92,9 +129,23 @@ export default function StudentsPage() {
           };
         });
         
+        console.log('[페이지] 학생 데이터 처리 완료:', studentsWithObservations.length);
+        
+        // 첫 번째 학생 샘플 데이터 출력 (디버깅용)
+        if (studentsWithObservations.length > 0) {
+          console.log('[페이지] 첫 번째 학생 샘플:', {
+            id: studentsWithObservations[0].id,
+            name: studentsWithObservations[0].name,
+            class_id: studentsWithObservations[0].class_id,
+            observationCount: studentsWithObservations[0].observationCount
+          });
+        }
+        
         setStudents(studentsWithObservations);
-      } catch (error) {
-        console.error('학생 데이터 로드 오류:', error);
+      } catch (error: any) {
+        console.error('[페이지] 학생 데이터 로드 오류:', error?.message || error);
+        setError(error?.message || '학생 데이터를 불러오는데 실패했습니다.');
+        setStudents([]);
       } finally {
         setIsLoading(false);
       }
@@ -143,6 +194,14 @@ export default function StudentsPage() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
+        
+        {/* 오류 메시지 표시 */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700">
+            <p className="font-medium">오류 발생</p>
+            <p>{error}</p>
+          </div>
+        )}
         
         {isLoading ? (
           <div className="flex justify-center items-center h-64">
@@ -199,7 +258,7 @@ export default function StudentsPage() {
                   ) : (
                     <tr>
                       <td colSpan={5} className="px-6 py-4 text-center text-sm text-gray-500">
-                        검색 결과가 없습니다
+                        {students.length === 0 && !error ? '학생 데이터가 없습니다.' : '검색 결과가 없습니다'}
                       </td>
                     </tr>
                   )}

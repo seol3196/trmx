@@ -25,6 +25,7 @@ export interface CardRecord {
   memo: string;
   recordedDate: Date;
   serverSynced?: boolean;
+  userId?: string; // 사용자 ID 필드 추가
 }
 
 // 로컬 저장을 위한 타입 (recordedDate가 문자열)
@@ -36,6 +37,7 @@ interface StoredCardRecord {
   memo: string;
   recordedDate: string;
   serverSynced?: boolean;
+  userId?: string; // 사용자 ID 필드 추가
 }
 
 // IndexedDB 초기화 (앱 시작시 호출되어야 함)

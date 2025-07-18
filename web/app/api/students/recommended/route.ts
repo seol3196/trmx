@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-// Supabase 서버 클라이언트 생성 (서비스 롤 사용)
-const createServerClient = () => {
+// 서비스 롤 키를 사용하는 클라이언트 생성 (RLS 우회)
+const createServiceClient = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://kbnskzykzornnvjoknry.supabase.co';
-  // 서비스 롤 키는 RLS를 우회할 수 있음
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtibnNrenlrem9ybm52am9rbnJ5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MTcyMzU3MSwiZXhwIjoyMDY3Mjk5NTcxfQ.qov51H7Hdx73j47kGQwaZRPakePSu-6sGFaVPwEArSo';
+  const supabaseServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtibnNrenlrem9ybm52am9rbnJ5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MTcyMzU3MSwiZXhwIjoyMDY3Mjk5NTcxfQ.qov51H7Hdx73j47kGQwaZRPakePSu-6sGFaVPwEArSo';
   
+  console.log('[API] 서비스 롤 키로 클라이언트 생성 (RLS 우회)');
   return createClient(supabaseUrl, supabaseServiceKey);
 };
 
@@ -52,8 +52,14 @@ interface Cache {
 let recommendationCache: Cache | null = null;
 
 // 추천 학생 데이터를 제공하는 API
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    // URL 파라미터에서 사용자 ID 가져오기
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('userId');
+    
+    console.log('[API] 추천 학생 요청 - 사용자 ID:', userId);
+    
     // 현재 날짜 (YYYY-MM-DD 형식)
     const today = new Date().toISOString().split('T')[0];
     
@@ -64,14 +70,22 @@ export async function GET() {
     
     try {
       // Supabase 연결 시도
-      const supabase = createServerClient();
+      const supabase = createServiceClient();
       const twoWeeksAgo = new Date();
       twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
       
-      // 1. 모든 학생 정보 가져오기
-      const { data: students, error: studentsError } = await supabase
+      // 1. 학생 정보 가져오기 (사용자 ID로 필터링 가능)
+      let studentsQuery = supabase
         .from('students')
         .select('id, name, class_id, student_number');
+      
+      // 사용자 ID로 필터링 (URL 파라미터에서 userId가 제공된 경우)
+      if (userId) {
+        console.log(`[API] 사용자 ID로 학생 필터링: ${userId}`);
+        studentsQuery = studentsQuery.eq('user_id', userId);
+      }
+      
+      const { data: students, error: studentsError } = await studentsQuery;
       
       if (studentsError) throw studentsError;
       if (!students || students.length === 0) {

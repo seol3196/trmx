@@ -3,13 +3,12 @@ import { createBrowserClient as createBrowserSupabaseClient } from '@supabase/ss
 import { createMiddlewareClient as createMiddlewareSupabaseClient } from '@supabase/auth-helpers-nextjs';
 import { NextRequest, NextResponse } from 'next/server';
 
-// 환경 변수에서 Supabase URL과 ANON 키를 가져옵니다
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+// 환경 변수에서 값을 가져오되, 실패할 경우 하드코딩된 값 사용
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://kbnskzykzornnvjoknry.supabase.co';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtibnNrenlrem9ybm52am9rbnJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTcyMjM1NzEsImV4cCI6MjAzMjc5OTU3MX0.gBEJhDKZgZCIvMBB4mvKHJOv0sYQFwNUOQGBU8cjT-M';
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Supabase 환경 변수가 설정되지 않았습니다. NEXT_PUBLIC_SUPABASE_URL과 NEXT_PUBLIC_SUPABASE_ANON_KEY를 확인해주세요.');
-}
+console.log('[Browser] Supabase URL:', supabaseUrl);
+console.log('[Browser] Supabase Anon Key 길이:', supabaseAnonKey ? supabaseAnonKey.length : 0);
 
 // 타입 정의
 export type Database = {
@@ -47,6 +46,8 @@ export type Database = {
 
 // 브라우저 클라이언트 생성 - 쿠키와 localStorage 모두 사용
 export const createBrowserClient = () => {
+  console.log('[Browser] 클라이언트 생성');
+  
   return createBrowserSupabaseClient<Database>(
     supabaseUrl,
     supabaseAnonKey,
@@ -109,6 +110,8 @@ export const createBrowserClient = () => {
 
 // 미들웨어 클라이언트 생성 - Next.js 미들웨어에서 사용
 export const createMiddlewareClient = ({ req, res }: { req: NextRequest; res: NextResponse }) => {
+  console.log('[Middleware] 클라이언트 생성');
+  
   return createMiddlewareSupabaseClient<Database>({
     req,
     res,
