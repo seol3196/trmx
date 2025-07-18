@@ -2,6 +2,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { ToastProvider } from '../components/toast';
+import { AuthProvider } from '../components/auth-provider';
 import Script from 'next/script';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -24,9 +25,11 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body className={inter.className}>
-        <ToastProvider>
-          {children}
-        </ToastProvider>
+        <AuthProvider>
+          <ToastProvider>
+            {children}
+          </ToastProvider>
+        </AuthProvider>
         
         {/* 동기화 관리자 초기화 스크립트 */}
         <Script id="sync-manager-init" strategy="afterInteractive">
@@ -51,4 +54,4 @@ export default function RootLayout({
       </body>
     </html>
   );
-} 
+}

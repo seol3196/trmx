@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "postgres": {
+      "command": "uvx",
+      "args": ["mcp-server-postgres"],
+      "env": {
+        "POSTGRES_CONNECTION_STRING": "postgresql://postgres:[YOUR_PASSWORD]@db.kbnskzykzornnvjoknry.supabase.co:5432/postgres"
+      },
+      "disabled": false,
+      "autoApprove": [
+        "postgres_list_tables",
+        "postgres_describe_table",
+        "postgres_select_data"
+      ]
+    }
+  }
+}
