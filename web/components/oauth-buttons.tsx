@@ -74,19 +74,42 @@ export function OAuthButtons({
     try {
       // 기존 코드 검증기 제거 (새로운 인증 시도를 위해)
       localStorage.removeItem('supabase.auth.code_verifier');
+      localStorage.removeItem('supabase.auth.code_challenge');
       console.log('기존 코드 검증기 제거됨');
+      
+      // 현재 호스트 URL 가져오기
+      const currentHost = window.location.origin;
+      console.log('현재 호스트 URL:', currentHost);
+      
+      // 디버깅: PKCE 코드 검증기 수동 생성
+      const generateCodeVerifier = () => {
+        const array = new Uint8Array(32);
+        window.crypto.getRandomValues(array);
+        return btoa(String.fromCharCode.apply(null, Array.from(array)))
+          .replace(/\+/g, '-')
+          .replace(/\//g, '_')
+          .replace(/=+$/, '');
+      };
+      
+      const codeVerifier = generateCodeVerifier();
+      console.log('생성된 코드 검증기:', codeVerifier.substring(0, 5) + '...');
+      
+      // 수동으로 로컬 스토리지에 저장 (테스트용)
+      localStorage.setItem('supabase.auth.code_verifier', codeVerifier);
       
       // OAuth 로그인 요청
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          // 콜백 URL을 통해 인증 후 리디렉션 처리
-          redirectTo: `${window.location.origin}/auth/callback?next=${redirectTo}`,
+          // 콜백 URL을 통해 인증 후 리디렉션 처리 (현재 호스트 기반)
+          redirectTo: `${currentHost}/auth/callback?next=${redirectTo}`,
           // 추가 OAuth 옵션
           queryParams: {
             access_type: 'offline', // 리프레시 토큰 요청
-            prompt: 'consent',      // 항상 동의 화면 표시
-          }
+            prompt: 'select_account',  // 항상 계정 선택 화면 표시
+            site_url: currentHost,  // 현재 호스트를 사이트 URL로 설정
+          },
+          skipBrowserRedirect: false, // 브라우저 리디렉션 활성화
         },
       });
       

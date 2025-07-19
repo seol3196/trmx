@@ -4,8 +4,8 @@ import { createMiddlewareClient as createMiddlewareSupabaseClient } from '@supab
 import { NextRequest, NextResponse } from 'next/server';
 
 // 환경 변수에서 값을 가져오되, 실패할 경우 하드코딩된 값 사용
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://kbnskzykzornnvjoknry.supabase.co';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtibnNrenlrem9ybm52am9rbnJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTcyMjM1NzEsImV4cCI6MjAzMjc5OTU3MX0.gBEJhDKZgZCIvMBB4mvKHJOv0sYQFwNUOQGBU8cjT-M';
+export const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://kbnskzykzornnvjoknry.supabase.co';
+export const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtibnNrenlrem9ybm52am9rbnJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTcyMjM1NzEsImV4cCI6MjAzMjc5OTU3MX0.gBEJhDKZgZCIvMBB4mvKHJOv0sYQFwNUOQGBU8cjT-M';
 
 console.log('[Browser] Supabase URL:', supabaseUrl);
 console.log('[Browser] Supabase Anon Key 길이:', supabaseAnonKey ? supabaseAnonKey.length : 0);
